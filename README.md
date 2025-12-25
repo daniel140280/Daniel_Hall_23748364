@@ -5,19 +5,19 @@ The purpose of this README is to cover the variations and features that have bee
 ## Variations attempted
 
 This table shows the features attempted. In order to demonstrate the features, the executeGame method will **run two simulations** at runtime.
-1. **All Game Simulations** - a nested loop will run all variations of the game using random dice.
-2. **The Scenario Runner** will use fixed dice to demonstrate each of the variations as per the assignment spec.
+> 1. **All Game Simulations** - a nested loop will run all variations of the game using random dice.
+> 2. **The Scenario Runner** will use fixed dice to demonstrate each of the variations as per the assignment spec.
 
-| Feature                                | Status  | Implementation Detail  | Brief reflection  |
-|----------------------------------------|---------|------------------------|-------------------|
-| Dice - single and double dice          | ✅      |                        |                   |
-| Players - 2 and 4 player               | ✅      |                        |                   |
-| Board - small and large                | ✅      |                        |                   |
-| End - exact end or overshoot           | ✅      |                        |                   |
-| Hit - allow or forfeit                 | ✅      |                        |                   |
-| Game State - Ready, In Play, Game Over | ✅      |                        |                   |
-| Dependency Injection                   | ✅      |                        |                   |
-| Save and Replay                        | ✅      |                        |                   |
+| Feature                                | Status  | Implementation Detail                                                          | Brief reflection  |
+|----------------------------------------|---------|--------------------------------------------------------------------------------|-------------------|
+| Dice - single and double dice          | ✅      |                                                                                |                   |
+| Players - 2 and 4 player               | ✅      |                                                                                |                   |
+| Board - small and large                | ✅      |                                                                                |                   |
+| End - exact end or overshoot           | ✅      | Strategy Pattern (ExactEndStrategy vs. OvershootAllowedStrategy)               |                   |
+| Hit - allow or forfeit                 | ✅      | Strategy Pattern (ForfeitOnHitStrategy cs. AllowHitStrategy)                   |                   |
+| Game State - Ready, In Play, Game Over | ✅      | State Pattern (Ready, In Play, Game Over)                                      |                   |
+| Dependency Injection                   | ✅      | Spring Boot dependency injection manages the lifecycle of runners and services |                   |
+| Save and Replay                        | ✅      |                                                                                |                   |
 
 ## Explanation of the Design Patterns used (and the SOLID principles followed)
 
@@ -27,25 +27,40 @@ As with many game designs, they often involve the need to handle different rule 
 
 Instead of using complex if/else statements inside the game engine, the engine delegates the decision to a Strategy object.
 
+```mermaid
 classDiagram
-class GameEngine
-class EndStrategy {
-<<interface>>
-+hasReachedEnd(player, pos) boolean
-}
-class ExactEndStrategy {
-+hasReachedEnd()
-}
-class OvershootAllowedStrategy {
-+hasReachedEnd()
-}
+    class GameEngine {
+        -EndStrategy endStrategy
+        -HitStrategy hitStrategy
+        +playGame()
+    }
 
-    GameEngine --> EndStrategy : Delegates decision
-    ExactEndStrategy ..|> EndStrategy
-    OvershootAllowedStrategy ..|> EndStrategy
+    class EndStrategy {
+        <<interface>>
+        +hasReachedEnd(Player p, int currentPos, int roll) boolean
+    }
+
+    class HitStrategy {
+        <<interface>>
+        +performHitCheck(Player p, Player target) boolean
+    }
+
+    class ExactEndStrategy {
+        +hasReachedEnd()
+    }
+    class OvershootAllowedStrategy {
+        +hasReachedEnd()
+    }
+
+    GameEngine --> EndStrategy : delegates to
+    GameEngine --> HitStrategy : delegates to
+    ExactEndStrategy ..|> EndStrategy : implements
+    OvershootAllowedStrategy ..|> EndStrategy : implements
+```
 
 The application uses the Spring Boot Framework for Dependency Injection, managing the lifecycle of the game simulation runners while keeping the core domain logic isolated from the framework itself.
 
+> ☑ 
 STATE MACHINE
 
 Summary of Responsibilities
