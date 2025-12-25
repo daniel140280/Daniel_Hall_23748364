@@ -1,18 +1,26 @@
 # DanielHall_23748364_FrustrationGame
-Game application for 6G5Z0059 Software Design and Architecture
+# Game application for 6G5Z0059 Software Design and Architecture
 
 The purpose of this README is to cover the variations and features that have been implemented for the Frustration boardgame, as well as an explanation of the designs and clean architecture applied to create it.
 
-Feature,Status,Implementation Detail
-Single & Double Dice,✅,Implemented via DiceShaker interface & FixedDiceShaker for deterministic testing.
-Land Exactly / Overshoot,✅,Strategy Pattern (ExactEndStrategy vs. OvershootAllowedStrategy).
-Hit & Forfeit,✅,Strategy Pattern (ForfeitOnHitStrategy vs. AllowHitStrategy).
-Large & Small Boards,✅,SmallGameBoard (20 slots) and LargeGameBoard (40 slots) implementations.
-4 Player Support,✅,"Dynamic player array supporting Red, Blue, Green, Yellow."
-Game State Machine,✅,"State Pattern (Ready, InPlay, GameOver) controls flow."
-Dependency Injection,✅,"Managed via Spring Boot (@Autowired, @Service)."
-Simulation Scenarios,✅,9 Pre-configured scenarios via ScenarioRunner and RunGame.
-Game Save/Replay,❌,Not yet implemented (Architecture supports this via future adapters).
+## Variations attempted
+
+This table shows the features attempted. In order to demonstrate them in action, the game will run two simulations at runtime.
+1. dfd
+2. dsf
+
+| Feature                                | Status  | Implementation Detail  | Brief reflection  |
+|----------------------------------------|---------|------------------------|-------------------|
+| Dice - single and double dice          | ✅      |                        |                   |
+| Players - 2 and 4 player               | ✅      |                        |                   |
+| Board - small and large                | ✅      |                        |                   |
+| End - exact end or overshoot           | ✅      |                        |                   |
+| Hit - allow or forfeit                 | ✅      |                        |                   |
+| Game State - Ready, In Play, Game Over | ✅      |                        |                   |
+| Dependency Injection                   |         |                        |                   |
+| Save and Replay                        |         |                        |                   |
+
+
 
 The application uses the Spring Boot Framework for Dependency Injection, managing the lifecycle of the game simulation runners while keeping the core domain logic isolated from the framework itself.
 
