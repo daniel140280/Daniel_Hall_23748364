@@ -21,6 +21,8 @@ import uk.ac.mmu.game.playersgamepositions.PlayersPosition;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 /**
  * Unit tests for game strategies in isolation.
  */

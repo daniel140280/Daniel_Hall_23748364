@@ -8,6 +8,9 @@ import uk.ac.mmu.game.rungame.GameEngine;
 import uk.ac.mmu.game.builders.GameTestBuilder;
 import uk.ac.mmu.game.test.mocks.MockGameListener;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class GameEngineTest {
     private RedPlayer red;
     private MockGameListener listener;

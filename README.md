@@ -5,9 +5,9 @@ The purpose of this README is to cover the variations and features that have bee
 
 ## Variations attempted
 
-This table shows the features attempted. In order to demonstrate them in action, the game will run two simulations at runtime.
-1. dfd
-2. dsf
+This table shows the features attempted. In order to demonstrate the features, the executeGame method will **run two simulations** at runtime.
+1. All Game Simulations - a nested loop will run all variations of the game using random dice.
+2. The Scenario Runner will use fixed dice to demonstrate each of the variations as per the assignment spec.
 
 | Feature                                | Status  | Implementation Detail  | Brief reflection  |
 |----------------------------------------|---------|------------------------|-------------------|
@@ -17,9 +17,10 @@ This table shows the features attempted. In order to demonstrate them in action,
 | End - exact end or overshoot           | ✅      |                        |                   |
 | Hit - allow or forfeit                 | ✅      |                        |                   |
 | Game State - Ready, In Play, Game Over | ✅      |                        |                   |
-| Dependency Injection                   |         |                        |                   |
-| Save and Replay                        |         |                        |                   |
+| Dependency Injection                   | ✅      |                        |                   |
+| Save and Replay                        | ✅      |                        |                   |
 
+## Explanation of the Design Patterns used (and the SOLID principles followed)
 
 
 The application uses the Spring Boot Framework for Dependency Injection, managing the lifecycle of the game simulation runners while keeping the core domain logic isolated from the framework itself.

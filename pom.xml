@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>uk.ac.mmu</groupId>
-	<artifactId>frustrationGame</artifactId>
+	<artifactId>game</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>game</name>
 	<description>Frustration Game by Daniel Hall 23748364</description>
