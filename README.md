@@ -14,7 +14,7 @@ This table shows the features attempted. In order to demonstrate the features, t
 | Players - 2 and 4 player               | ✅      |                                                                                |                   |
 | Board - small and large                | ✅      |                                                                                |                   |
 | End - exact end or overshoot           | ✅      | Strategy Pattern (ExactEndStrategy vs. OvershootAllowedStrategy)               |                   |
-| Hit - allow or forfeit                 | ✅      | Strategy Pattern (ForfeitOnHitStrategy cs. AllowHitStrategy)                   |                   |
+| Hit - allow or forfeit                 | ✅      | Strategy Pattern (ForfeitOnHitStrategy vs. AllowHitStrategy)                   |                   |
 | Game State - Ready, In Play, Game Over | ✅      | State Pattern (Ready, In Play, Game Over)                                      |                   |
 | Dependency Injection                   | ✅      | Spring Boot dependency injection manages the lifecycle of runners and services |                   |
 | Save and Replay                        | ✅      |                                                                                |                   |
@@ -57,7 +57,10 @@ classDiagram
     ExactEndStrategy ..|> EndStrategy : implements
     OvershootAllowedStrategy ..|> EndStrategy : implements
 ```
+> ☑ SOLID Principles applied
 
+* Open/Closed Principle (OCP): We can add a new winning rule (e.g., "Must roll a 6 to finish") by creating a new class, without modifying the existing GameEngine code.
+* Dependency Inversion (DIP): The Engine depends on the abstraction (EndStrategy), not the details (ExactEndStrategy).
 The application uses the Spring Boot Framework for Dependency Injection, managing the lifecycle of the game simulation runners while keeping the core domain logic isolated from the framework itself.
 
 > ☑ 
