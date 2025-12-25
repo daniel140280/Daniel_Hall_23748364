@@ -1,13 +1,12 @@
-# DanielHall_23748364_FrustrationGame
-# Game application for 6G5Z0059 Software Design and Architecture
+# DanielHall_23748364_FrustrationGame for 6G5Z0059 Software Design and Architecture
 
 The purpose of this README is to cover the variations and features that have been implemented for the Frustration boardgame, as well as an explanation of the designs and clean architecture applied to create it.
 
 ## Variations attempted
 
 This table shows the features attempted. In order to demonstrate the features, the executeGame method will **run two simulations** at runtime.
-1. All Game Simulations - a nested loop will run all variations of the game using random dice.
-2. The Scenario Runner will use fixed dice to demonstrate each of the variations as per the assignment spec.
+1. **All Game Simulations** - a nested loop will run all variations of the game using random dice.
+2. **The Scenario Runner** will use fixed dice to demonstrate each of the variations as per the assignment spec.
 
 | Feature                                | Status  | Implementation Detail  | Brief reflection  |
 |----------------------------------------|---------|------------------------|-------------------|
@@ -22,6 +21,28 @@ This table shows the features attempted. In order to demonstrate the features, t
 
 ## Explanation of the Design Patterns used (and the SOLID principles followed)
 
+### Strategy Pattern - handling game variation
+
+As with many game designs, they often involve the need to handle different rule sets (or strategy) without rewriting the core game engine. **Strategy Pattern** is used to encapsulate these algorithms.
+
+Instead of using complex if/else statements inside the game engine, the engine delegates the decision to a Strategy object.
+
+classDiagram
+class GameEngine
+class EndStrategy {
+<<interface>>
++hasReachedEnd(player, pos) boolean
+}
+class ExactEndStrategy {
++hasReachedEnd()
+}
+class OvershootAllowedStrategy {
++hasReachedEnd()
+}
+
+    GameEngine --> EndStrategy : Delegates decision
+    ExactEndStrategy ..|> EndStrategy
+    OvershootAllowedStrategy ..|> EndStrategy
 
 The application uses the Spring Boot Framework for Dependency Injection, managing the lifecycle of the game simulation runners while keeping the core domain logic isolated from the framework itself.
 
