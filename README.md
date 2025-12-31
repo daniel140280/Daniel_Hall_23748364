@@ -8,18 +8,40 @@ This table shows the features attempted. In order to demonstrate the features, t
 > 1. **All Game Simulations** - a nested loop will run all variations of the game using random dice.
 > 2. **The Scenario Runner** will use fixed dice to demonstrate each of the variations as per the assignment spec.
 
-| Feature                                | Status  | Implementation Detail                                                          | Brief reflection  |
-|----------------------------------------|---------|--------------------------------------------------------------------------------|-------------------|
-| Dice - single and double dice          | ✅      |                                                                                |                   |
-| Players - 2 and 4 player               | ✅      |                                                                                |                   |
-| Board - small and large                | ✅      |                                                                                |                   |
-| End - exact end or overshoot           | ✅      | Strategy Pattern (ExactEndStrategy vs. OvershootAllowedStrategy)               |                   |
-| Hit - allow or forfeit                 | ✅      | Strategy Pattern (ForfeitOnHitStrategy vs. AllowHitStrategy)                   |                   |
-| Game State - Ready, In Play, Game Over | ✅      | State Pattern (Ready, In Play, Game Over)                                      |                   |
-| Dependency Injection                   | ✅      | Spring Boot dependency injection manages the lifecycle of runners and services |                   |
-| Save and Replay                        | ✅      |                                                                                |                   |
+| Feature                                    | Status  | Implementation Detail                                                          | Brief reflection  |
+|--------------------------------------------|---------|--------------------------------------------------------------------------------|-------------------|
+| **Dice** - single and double dice          | ✅      |                                                                                |                   |
+| **Players** - 2 and 4 player               | ✅      |                                                                                |                   |
+| **Board** - small and large                | ✅      |                                                                                |                   |
+| **End** - exact end or overshoot           | ✅      | Strategy Pattern (ExactEndStrategy vs. OvershootAllowedStrategy)               |                   |
+| **Hit** - allow or forfeit                 | ✅      | Strategy Pattern (ForfeitOnHitStrategy vs. AllowHitStrategy)                   |                   |
+| **Game State** - Ready, In Play, Game Over | ✅      | State Pattern (Ready, In Play, Game Over)                                      |                   |
+| **Dependency Injection**                   | ✅      | Spring Boot dependency injection manages the lifecycle of runners and services |                   |
+| **Save and Replay**                        | ✅      |                                                                                |                   |
 
 ## Explanation of the Design Patterns used (and the SOLID principles followed)
+
+This section describes how the game flows, the design decisions and how the system applies **SOLID** and **Clean Architecture**. The goal is to demonstrate how each part of the system contributes to a **clean and extensible** game. 
+
+### High Level Game Flow
+
+The following game diagram explains how the game flows. The reason for showing you this? Well, it helps clearly segment the following sections that elaborate on the chosen design and core principles applied.
+```mermaid
+flowchart TD
+A[Spring Boot Startup] --> B[RunGame / Scenario Runner]
+B --> C[GameConfiguration]
+C --> D[GameEngine]
+D --> E[State Machine]
+D --> F[Move Strategy]
+D --> G[End & Hit Strategies]
+D --> H[Player Contexts]
+D --> I[Observers]
+E -->|Transitions| D
+F -->|Movement| D
+G -->|Rule Validation| F
+H -->|State Updates| F
+I -->|Notifications| D
+```
 
 ### Strategy Pattern - handling game variation
 
@@ -110,3 +132,9 @@ Why this is SOLID:
 SRP: The GameEngine loop only cares about the "Turn Order" and the "Safeguard." It doesn't care about the rules of winning; the InPlayState and MoveStrategy handle that.
 
 LSP (Liskov Substitution): We can swap ReadyState for InPlayState or GameOverState at any time, and the takeTurn method still works perfectly because they all follow the same GameState "contract."
+
+REFLECTION
+This was as the name suggests, a frustrating, but rewarding challenge.
+Unsuprisingly there are many ways to create the game, all with merit, but ultimately this is what I choose.
+I needed to start again, re-add Spring Boot.
+Get frustated as game looped (end strategy) issue
