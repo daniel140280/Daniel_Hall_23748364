@@ -67,17 +67,17 @@ I -->|Notifications| D
   * **Adapters** (*implementations*) - **MORE DETAIL REQUIRED** role here is to provide the concrete implementations, based on the users selection.....meaning
   * **Gateways** (*dispatchers*) - **MORE DETAIL REQUIRED** role is to dispatch (NOT GOOD WORD) based on enums the user selection, which are then implemented via the adapters that determine the concrete instantiation required.
 
-# Demonstrating the Factory, Gateway and Adapter set-up demonstration for the Game Board selection (small/large)  
+### Demonstrating the Factory, Gateway and Adapter set-up demonstration for the Game Board selection (small/large)  
 ```mermaid
 flowchart LR
-    Enum[BoardOption] --> Gateway(BoardFactoryGateway)
+    Enum[BoardOption (enums)] --> Gateway(BoardFactoryGateway)
     Gateway --> Adapter1[SmallBoardFactoryAdapter]
     Gateway --> Adapter2[LargeBoardFactoryAdapter]
     Adapter1 --> Board1[SmallGameBoard]
     Adapter2 --> Board2[LargeGameBoard]
 ```
 > ☑ **Rationale for the design**
-Using Factories, Gateways and Adapters for specific game set-up activities, means that extending the game (board, dice, rule strategy) requires no changes to the engine. Perfect for **separation of concerns**. 
+* Using Factories, Gateways and Adapters for specific game set-up activities, means that extending the game (board, dice, rule strategy) requires no changes to the engine. Perfect for **separation of concerns**. 
 * **Open/Closed principle** applies to the Board, Dice and Game Strategies, making updates and further extensions simple without modifying the existing game engine. E.g. adding a 3rd dice, bigger board or different strategy is simple as they are open to change without impacting the closed game engine.
 * **Dependency Inversion Principle (DIP)** means that the game engine depends on abstract interfaces, rather than concrete implementations. This allows the game to be determined at runtime.
   * Enums are utilised for the various chosen game implementations to simplify instantiation and separate concerns into cleaner encapsulation.
@@ -99,7 +99,7 @@ It then orchestrates the game:
 
 ## 5. State Machine
 The State Machine **controls the game lifecycle**. This game deploys a fairly simplistic state machine utilising only 3 states. (CHECK UNI MATERIAL)
-# Example below, shows the State Machine for this game
+### Example below, shows the State Machine for this game
 ```mermaid
 stateDiagram-v2
     [*] --> Ready
@@ -119,8 +119,7 @@ ALSO REFERENCE THE FACT IF ALLOWS TO SAY GAME OVER IF FORCE ANOTHER DICE ROLL, P
 
 Pre and post validation of these. Invertoers or something I took a pic of. Checks of the rules.
 ## 7. End & Hit Strategies (Strategy Pattern - handling game variation)
-
-As with many game designs, they often involve the need to handle different rule sets (or strategy) without rewriting the core game engine. **Strategy Pattern** is used to encapsulate these algorithms.
+As with many game designs, they often involve the **need to handle different rule sets** (*or strategy*) without rewriting the core game engine. **Strategy Pattern** is used to encapsulate these algorithms.
 
 Instead of using complex if/else statements inside the game engine, the engine delegates the decision to a Strategy object.
 
@@ -134,25 +133,40 @@ classDiagram
 
     class EndStrategy {
         <<interface>>
-        +hasReachedEnd(Player p, int currentPos, int roll) boolean
+        +hasReachedEnd(Player player, int currentPos) boolean
+        +calculateOvershoot(Player player, int currentIndex) int
+        +isValidMove(Player player, int currentIndex, int roll, int boardLength, int tailLength, int stepsTaken) boolean
     }
 
     class HitStrategy {
         <<interface>>
-        +performHitCheck(Player p, Player target) boolean
-    }
-
-    class ExactEndStrategy {
-        +hasReachedEnd()
-    }
-    class OvershootAllowedStrategy {
-        +hasReachedEnd()
+        +canMoveToPosition(Player currentPlayer, int targetIndex, Map<Player, PlayersInGameContext> allPlayers, GameBoard board); boolean
     }
 
     GameEngine --> EndStrategy : delegates to
     GameEngine --> HitStrategy : delegates to
     ExactEndStrategy ..|> EndStrategy : implements
     OvershootAllowedStrategy ..|> EndStrategy : implements
+    AllowHitStrategy ..|> HitStrategy : implements
+    ForfeitOnHitStrategy ..|> HitStrategy : implements
+    
+    class ExactEndStrategy {
+        +hasReachedEnd()
+        +calculateOvershoot()
+        +isValidMove()
+    }
+    class OvershootAllowedStrategy {
+        +hasReachedEnd()
+        +calculateOvershoot()
+        +isValidMove()
+    }
+    
+    class AllowHitStrategy {
+        +canMoveToPosition()
+    }
+    class ForfeitOnHitStrategy {
+        +canMoveToPosition()
+    }
 ```
 > ☑ SOLID Principles applied
 
