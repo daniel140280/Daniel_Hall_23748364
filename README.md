@@ -117,7 +117,7 @@ ALSO REFERENCE THE FACT IF ALLOWS TO SAY GAME OVER IF FORCE ANOTHER DICE ROLL, P
 
 ## 6. Move Strategy (Strategy Layer logic)
 
-Pre and post validation of these. Invertoers or something I took a pic of. Checks of the rules.
+Pre and post validation of these. Inverters or something I took a pic of. Checks of the rules.
 ## 7. End & Hit Strategies (Strategy Pattern - handling game variation)
 As with many game designs, they often involve the **need to handle different rule sets** (*or strategy*) without rewriting the core game engine. **Strategy Pattern** is used to encapsulate these algorithms.
 
