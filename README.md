@@ -116,23 +116,41 @@ ALSO REFERENCE THE FACT IF ALLOWS TO SAY GAME OVER IF FORCE ANOTHER DICE ROLL, P
 * **TBC - need more SOLID principles**
 
 ## 6. Move Strategy (Strategy Layer logic)
+Move Strategy is integral to the game (like everything I guess), because it handles a players movements. More specifically, the **StandardMoveStrategy** class handles:
+1. **Calculation of a players position** / potential movement based on their dice roll.
+2. TBC PRE AND POST VALIDATORS. Validates potential movement dependent on the **EndStrategy and HitStrategy** applied.
+3. **Applying the move** (assuming valid).
+4. **Notifying listeners** - in order that game progress is recorded appropriately.
+5. **Highlighting a player finishing** and winning the game, and driving the resulting output.
 
-Pre and post validation of these. Inverters or something I took a pic of. Checks of the rules.
+> ☑ **Rationale for the design**
+* Whilst this game demonstrates two strategies, this design **allows further movement rules to be simply plugged in**, making it easily extensible.
+* Likewise, the existing **End and Hit strategies can be amended / extended independently** without impacting the MoveStrategy class,as it relies on the abstract interface class. The specific strategy required is injected in as part of the GameConfiguration, providing the concrete implementation.
+* **TBC - need more SOLID principles**
+
+## TBC Pre and post validation of these. Inverters or something I took a pic of. Checks of the rules.
+
 ## 7. End & Hit Strategies (Strategy Pattern - handling game variation)
 As with many game designs, they often involve the **need to handle different rule sets** (*or strategy*) without rewriting the core game engine. **Strategy Pattern** is used to encapsulate these algorithms.
 
-Instead of using complex if/else statements inside the game engine, the engine delegates the decision to a Strategy object.
+* Instead of using complex if/else statements inside the game engine, the engine **delegates the decision to a Strategy object**.
+* There are two strategies applied in this game, each with their own two implementation strategies.
+* End Strategy - supports the rules around where the player must land to win the game.
+* Hit Strategy - considers the rules around players collision on the game board.
 
+### Strategy follows the Dependency Inversion Principle (DIP) as demonstrated below
 ```mermaid
 classDiagram
-    %% Define the top node first
+    direction TB
+
+    %% Top-level
     class GameEngine {
         -EndStrategy endStrategy
         -HitStrategy hitStrategy
         +playGame()
     }
 
-    %% Define the interfaces next
+    %% Interfaces
     class EndStrategy {
         <<interface>>
         +hasReachedEnd(Player player, int currentPos) boolean
@@ -142,15 +160,10 @@ classDiagram
 
     class HitStrategy {
         <<interface>>
-        +canMoveToPosition(
-            Player currentPlayer,
-            int targetIndex,
-            Map<Player, PlayersInGameContext> allPlayers,
-            GameBoard board
-        ) boolean
+        +canMoveToPosition(Player currentPlayer, int targetIndex, Map<Player, PlayersInGameContext> allPlayers, GameBoard board) boolean
     }
 
-    %% Define the EndStrategy implementations under the interface
+    %% Implementations under EndStrategy
     class ExactEndStrategy {
         +hasReachedEnd()
         +calculateOvershoot()
@@ -163,7 +176,7 @@ classDiagram
         +isValidMove()
     }
 
-    %% Define the HitStrategy implementations under the interface
+    %% Implementations under HitStrategy
     class AllowHitStrategy {
         +canMoveToPosition()
     }
@@ -172,7 +185,7 @@ classDiagram
         +canMoveToPosition()
     }
 
-    %% Relationships (keep them after all classes to reduce layout surprises)
+    %% Relationships
     GameEngine --> EndStrategy : delegates to
     GameEngine --> HitStrategy : delegates to
 
@@ -183,9 +196,10 @@ classDiagram
     ForfeitOnHitStrategy ..|> HitStrategy : implements
 ```
 > ☑ SOLID Principles applied
-
-* Open/Closed Principle (OCP): We can add a new winning rule (e.g., "Must roll a 6 to finish") by creating a new class, without modifying the existing GameEngine code.
-* Dependency Inversion (DIP): The Engine depends on the abstraction (EndStrategy), not the details (ExactEndStrategy).
+> ☑ **Rationale for the design**
+* Both the End and Hit Strategy rules are isolated.
+* New rules, such as a *'winning rule'* (e.g. must roll a 6 to finish) can be created, without modifying the existing GameEngine code. This aligns to the **Open/Closed Principle (OCP)**.
+* The Engine depends on the abstraction (i.e. EndStrategy), not the details (e.g ExactEndStrategy), which demonstrates the Dependency Inversion Principle (DIP). 
 The application uses the Spring Boot Framework for Dependency Injection, managing the lifecycle of the game simulation runners while keeping the core domain logic isolated from the framework itself.
 
 > ☑ 
@@ -240,7 +254,10 @@ LSP (Liskov Substitution): We can swap ReadyState for InPlayState or GameOverSta
 
 ## 9. Observers
 
-REFLECTION
+
+
+
+# REFLECTION
 This was as the name suggests, a frustrating, but rewarding challenge.
 Unsuprisingly there are many ways to create the game, all with merit, but ultimately this is what I choose.
 I needed to start again, re-add Spring Boot.
