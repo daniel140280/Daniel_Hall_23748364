@@ -125,16 +125,14 @@ Instead of using complex if/else statements inside the game engine, the engine d
 
 ```mermaid
 classDiagram
-    direction TB
-
-    %% Top-level
+    %% Define the top node first
     class GameEngine {
         -EndStrategy endStrategy
         -HitStrategy hitStrategy
         +playGame()
     }
 
-    %% Interfaces
+    %% Define the interfaces next
     class EndStrategy {
         <<interface>>
         +hasReachedEnd(Player player, int currentPos) boolean
@@ -144,10 +142,15 @@ classDiagram
 
     class HitStrategy {
         <<interface>>
-        +canMoveToPosition(Player currentPlayer, int targetIndex, Map<Player, PlayersInGameContext> allPlayers, GameBoard board) boolean
+        +canMoveToPosition(
+            Player currentPlayer,
+            int targetIndex,
+            Map<Player, PlayersInGameContext> allPlayers,
+            GameBoard board
+        ) boolean
     }
 
-    %% Implementations under EndStrategy
+    %% Define the EndStrategy implementations under the interface
     class ExactEndStrategy {
         +hasReachedEnd()
         +calculateOvershoot()
@@ -160,7 +163,7 @@ classDiagram
         +isValidMove()
     }
 
-    %% Implementations under HitStrategy
+    %% Define the HitStrategy implementations under the interface
     class AllowHitStrategy {
         +canMoveToPosition()
     }
@@ -169,7 +172,7 @@ classDiagram
         +canMoveToPosition()
     }
 
-    %% Relationships
+    %% Relationships (keep them after all classes to reduce layout surprises)
     GameEngine --> EndStrategy : delegates to
     GameEngine --> HitStrategy : delegates to
 
@@ -178,7 +181,6 @@ classDiagram
 
     AllowHitStrategy ..|> HitStrategy : implements
     ForfeitOnHitStrategy ..|> HitStrategy : implements
-
 ```
 > ☑ SOLID Principles applied
 
