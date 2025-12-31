@@ -125,12 +125,16 @@ Instead of using complex if/else statements inside the game engine, the engine d
 
 ```mermaid
 classDiagram
+    direction TB
+
+    %% Top-level
     class GameEngine {
         -EndStrategy endStrategy
         -HitStrategy hitStrategy
         +playGame()
     }
 
+    %% Interfaces
     class EndStrategy {
         <<interface>>
         +hasReachedEnd(Player player, int currentPos) boolean
@@ -140,33 +144,41 @@ classDiagram
 
     class HitStrategy {
         <<interface>>
-        +canMoveToPosition(Player currentPlayer, int targetIndex, Map<Player, PlayersInGameContext> allPlayers, GameBoard board); boolean
+        +canMoveToPosition(Player currentPlayer, int targetIndex, Map<Player, PlayersInGameContext> allPlayers, GameBoard board) boolean
     }
 
-    GameEngine --> EndStrategy : delegates to
-    GameEngine --> HitStrategy : delegates to
-    ExactEndStrategy ..|> EndStrategy : implements
-    OvershootAllowedStrategy ..|> EndStrategy : implements
-    AllowHitStrategy ..|> HitStrategy : implements
-    ForfeitOnHitStrategy ..|> HitStrategy : implements
-    
+    %% Implementations under EndStrategy
     class ExactEndStrategy {
         +hasReachedEnd()
         +calculateOvershoot()
         +isValidMove()
     }
+
     class OvershootAllowedStrategy {
         +hasReachedEnd()
         +calculateOvershoot()
         +isValidMove()
     }
-    
+
+    %% Implementations under HitStrategy
     class AllowHitStrategy {
         +canMoveToPosition()
     }
+
     class ForfeitOnHitStrategy {
         +canMoveToPosition()
     }
+
+    %% Relationships
+    GameEngine --> EndStrategy : delegates to
+    GameEngine --> HitStrategy : delegates to
+
+    ExactEndStrategy ..|> EndStrategy : implements
+    OvershootAllowedStrategy ..|> EndStrategy : implements
+
+    AllowHitStrategy ..|> HitStrategy : implements
+    ForfeitOnHitStrategy ..|> HitStrategy : implements
+
 ```
 > ☑ SOLID Principles applied
 
