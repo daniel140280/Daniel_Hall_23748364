@@ -70,7 +70,7 @@ I -->|Notifications| D
 ### Demonstrating the Factory, Gateway and Adapter set-up demonstration for the Game Board selection (small/large)  
 ```mermaid
 flowchart LR
-    Enum[BoardOption (enums)] --> Gateway(BoardFactoryGateway)
+    Enum[BoardOption] --> Gateway(BoardFactoryGateway)
     Gateway --> Adapter1[SmallBoardFactoryAdapter]
     Gateway --> Adapter2[LargeBoardFactoryAdapter]
     Adapter1 --> Board1[SmallGameBoard]
