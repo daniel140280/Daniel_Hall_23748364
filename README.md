@@ -20,9 +20,15 @@ This table shows the features attempted. In order to demonstrate the features, t
 | **Dependency Injection**                   | ✅      | Spring Boot dependency injection manages the lifecycle of runners and services |                   |
 | **Save and Replay**                        | ✅      |                                                                                |                   |
 
-## Explanation of the Design Patterns used (and the SOLID principles followed)
+## Explanation of the Design Patterns used (incl. SOLID principles and Clean Architecture applied)
 
-This section describes how the game flows, the design decisions and how the system applies **SOLID** and **Clean Architecture**. The goal is to demonstrate how each part of the system contributes to a **clean, easily extensible and testable** game. 
+This section describes how the game flows, the design decisions and how the system applies **SOLID** and **Clean Architecture**. The goal is to demonstrate how each part of the system contributes to a **clean, easily extensible and testable** game.
+
+* TBC - throughout the game packages and encapsulation are used to ensure private XYZ
+* Factories - good, why and when used.
+* Dependencies always point inwards.
+* Lab 10 infrastructure vs application domain models
+* RECORDS used, where and why?
 
 ### High Level Game Flow
 
@@ -254,7 +260,81 @@ LSP (Liskov Substitution): We can swap ReadyState for InPlayState or GameOverSta
 
 ## 9. Observers
 
+# Summary of key designs
+## SOLID
+**TBC**
 
+## Clean Architecture
+
+EXPLAIN ABOUT CLEAN ARCHTIECTURE AND THE DOMAIN MODEL/ VOLATILE ELEMENTS ARE KEPT SEPERATE - following DIP.
+
+Inline with the Clean Architecture principles, you can see that the Frustration game ensures **all dependencies point inwards** towards the most stable part of the system - the **domain layer**, with all other aspects of the game dependent on it.
+
+In Clean Architecture:
+- Outer layers may depend on inner layers
+- Inner layers must never depend on outer layers
+- Dependencies always point towards the core domain
+
+Why this is good
+- The domain is pure, testable, and framework‑agnostic
+- You can replace the UI, logging, or factories without touching the engine
+- You can add new rules without modifying existing logic
+- The system is stable, extensible, and easy to reason about
+
+## Frustration Game - Clean Architecture summaries
+### Demonstration of the game architecture:
+
+```mermaid
+flowchart TD
+    subgraph Framework Layer
+        Spring[Spring Boot Startup]
+    end
+
+    subgraph Infrastructure Layer
+        Obs[ObserverConsoleLogger]
+        Factories[Factory Adapters + Gateways]
+    end
+
+    subgraph Application Layer
+        Engine[GameEngine]
+        Config[GameConfiguration]
+    end
+
+    subgraph Domain Layer
+        Strategies[Strategies (End/Hit/Move)]
+        StateMachine[State Machine]
+        ValueObjects[Player Contexts & Positions]
+        Board[GameBoard]
+        Dice[DiceShaker]
+        Player[Player]
+    end
+
+    Spring --> Engine
+    Obs --> Engine
+    Factories --> Config
+    Config --> Engine
+
+    Engine --> Strategies
+    Engine --> StateMachine
+    Engine --> ValueObjects
+    Engine --> Board
+    Engine --> Dice
+    Engine --> Player
+
+    Strategies --> ValueObjects
+    Strategies --> Board
+    Strategies --> Player
+
+    StateMachine --> Engine
+```
+### Game - Clean Architecture summary table:
+
+| Layer                    | Game example                                                                 | Clean Architecture and importance                                                                                     |
+|--------------------------|------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------|
+| **Domain Layer**         | Pure business logic - board, dice, players, strategies, state machine.       | No outward dependencies, such as on Spring injection, factories or console output. Remains clean and easily testable. |
+| **Application Layer**    | Orchestrates the Domain - GameEngine and GameConfiguration.                  | Depends only on Domain interfaces (abstract by nature) - never on Infrastructure.                                     |
+| **Infrastructure Layer** | Implements the Domain interfaces - observers, factory adapters and gateways. | Dependent on Domain interface abstractions (ports) - never the other way around.                                      |
+| **Framework Layer**      | The outermost ring, which is Sprint Boot.                                    | Depends on everything else, but nothing should depend on it.                                                          | 
 
 
 # REFLECTION
