@@ -286,24 +286,24 @@ Why this is good
 
 ```mermaid
 flowchart TD
-    subgraph Framework Layer
+    subgraph Framework_Layer
         Spring[Spring Boot Startup]
     end
 
-    subgraph Infrastructure Layer
+    subgraph Infrastructure_Layer
         Obs[ObserverConsoleLogger]
-        Factories[Factory Adapters + Gateways]
+        Factories[Factory Adapters and Gateways]
     end
 
-    subgraph Application Layer
+    subgraph Application_Layer
         Engine[GameEngine]
         Config[GameConfiguration]
     end
 
-    subgraph Domain Layer
-        Strategies[Strategies (End/Hit/Move)]
+    subgraph Domain_Layer
+        Strategies[Strategies End Hit Move]
         StateMachine[State Machine]
-        ValueObjects[Player Contexts & Positions]
+        ValueObjects[Player Contexts and Positions]
         Board[GameBoard]
         Dice[DiceShaker]
         Player[Player]
@@ -329,12 +329,12 @@ flowchart TD
 ```
 ### Game - Clean Architecture summary table:
 
-| Layer                    | Game example                                                                 | Clean Architecture and importance                                                                                     |
-|--------------------------|------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------|
-| **Domain Layer**         | Pure business logic - board, dice, players, strategies, state machine.       | No outward dependencies, such as on Spring injection, factories or console output. Remains clean and easily testable. |
-| **Application Layer**    | Orchestrates the Domain - GameEngine and GameConfiguration.                  | Depends only on Domain interfaces (abstract by nature) - never on Infrastructure.                                     |
-| **Infrastructure Layer** | Implements the Domain interfaces - observers, factory adapters and gateways. | Dependent on Domain interface abstractions (ports) - never the other way around.                                      |
-| **Framework Layer**      | The outermost ring, which is Sprint Boot.                                    | Depends on everything else, but nothing should depend on it.                                                          | 
+| Layer              | Purpose and Game example                                                                                | Clean Architecture and importance                                                                                     |
+|--------------------|---------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------|
+| **Domain**         | Pure business logic<br/> - board, dice, players, strategies, state machine.                             | No outward dependencies, such as on Spring injection, factories or console output. Remains clean and easily testable. |
+| **Application**    | Orchestrates the Domain<br/> - GameEngine and GameConfiguration.                                        | Depends only on Domain interfaces (abstract by nature) - never on Infrastructure.                                     |
+| **Infrastructure** | Implements the Domain interfaces and external concerns<br/> - observers, factory adapters and gateways. | Dependent on Domain interface abstractions (ports) - never the other way around.                                      |
+| **Framework**      | The outermost ring dealing with start-up and dependency injection<br/> - Sprint Boot.                   | Depends on everything else, but nothing should depend on it.                                                          | 
 
 
 # REFLECTION
