@@ -13,7 +13,7 @@ public class RunGame {
     @Autowired
     ScenarioRunner runner;
     public void executeGame(){
-//        simulations.runAllGameSimulations();
+        simulations.runAllGameSimulations();
 
         runner.runScenarioOneA();
         runner.runScenarioOneB();
