@@ -20,9 +20,7 @@ import java.util.Map;
 
 /**
  * GameEngine runs the game loop.
- * Accepts GameConfiguration (DIP, SOLID).
- * - Winner tracking added.
- * - Tail check requires isInTail() AND >= tailEndIndex.
+ * Accepts GameConfiguration.
  */
 public class GameEngine {
     private final Player[] players;
@@ -37,8 +35,6 @@ public class GameEngine {
     public Player getWinner() { return winner; }
     private int totalGameMoves = 0;
     private final int MAX_MOVES = 100; //This is a safeguard against potential infinite loops where exact end game is played with 2 dice.
-
-
 
     public GameEngine(GameConfiguration config) {
         this.players = config.getPlayers();
@@ -92,16 +88,6 @@ public class GameEngine {
     }
 
 
-//    // The States need this to trigger your move logic
-//    public StandardMoveStrategy getMoveStrategy() {
-//        return this.moveStrategy;
-//    }
-//
-//    // The ReadyState needs this to call handleMove again after transitioning
-//    public GameState getGameState() {
-//        return this.state;
-//    }
-
     public GameEngine(PlayerOption playerOpt,
                       DiceOption diceOpt,
                       BoardOption boardOpt,
@@ -150,44 +136,3 @@ public class GameEngine {
         this.takeTurn(playerContexts.get(players[0]), 6);
     }
 }
-
-//------------------------------
-//public void playGame() {
-//    // First checking the game state is over.
-//    if (state instanceof GameOverState) {
-//        state.handleMove(this, null, 0);
-//        return;
-//    }
-//
-//    winner = null;
-//    boolean gameOver = false;
-//    totalGameMoves = 0;
-//    while (!gameOver) {
-//        for (Player player : players) {
-//            PlayersInGameContext context = playerContexts.get(player);
-//            // Skip finished players
-//            if (context.isFinished()) {
-//                continue;
-//            }
-//
-//            int roll = dice.shake();
-//            totalGameMoves ++;
-//            state.handleMove(this, context, roll);
-////                moveStrategy.move(context, roll);
-//            // Only check win condition if move was successful and player hasn't forfeited.
-//            if (endStrategy.hasReachedEnd(player, context.getPlayersPosition().getBoardIndex())) {
-//                context.setFinished(true);
-//                winner = player;
-//                gameOver = true;
-//                break;
-//            }
-//        }
-//    }
-//    // Notify listeners
-//    for (GameListener listener : listeners) {
-//        listener.onGameOver(players, playerContexts, totalGameMoves);
-//    }
-//    if (winner != null) {
-//        System.out.println("\n🏆 Winner: " + winner.getColorCode() + winner.getName() + "\u001B[0m");
-//    }
-//}
