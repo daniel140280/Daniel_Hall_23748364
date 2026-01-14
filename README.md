@@ -56,7 +56,7 @@ flowchart TD
     end
 
     subgraph Application_Layer
-        Engine[GameEngine (Facade)]
+        Engine[GameEngine - Facade]
         Config[GameConfiguration]
         Runners[Scenario Runners]
     end
