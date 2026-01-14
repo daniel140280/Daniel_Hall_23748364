@@ -1,12 +1,16 @@
 # DanielHall_23748364_FrustrationGame for 6G5Z0059
 # Software Design and Architecture
 
-This README explains the **design, architecture** and **implementation** of the Frustration board game.
+This README explains the **design patterns, architecture** and **implementation decisions** used in the Frustration board game. It assumes the reader is a professional with an implied knowledge of design patterns, SOLID principles and clean architecture - meaning these will not be explicitly explained.
 The document is split into two parts:
 * **Part A** documents the variations implemented and summarises the design patterns used. 
 * **Part B** performs a deep-dive into the game flow, providing a more comprehensive view of the design patterns used, how SOLID and Clean Architecture principles are applied and more.
 
-The aim being to show not just what was built, but why it was built that way - showcasing how the design is SOLID and achieves extensibility through ports, adapters, factories, and domain‑driven abstractions.
+The focus is on **why the system is designed and built that way**. The design is intentionally modular to enable the game to be extensible and testable, following:
+* **Clean Architecture** - achieving extensibility through ports and adapters.
+* **Design Patterns** - Strategy, State, Factory, Observer and Facades.
+* **SOLID principles**
+* **Domain-driven modelling** - value objects, invariants, encapsulations and such.
 
 ## Part A. Variations implemented
 
@@ -27,10 +31,61 @@ In order to demonstrate the features, run the game via the **FrustrationGameAppl
 | **Save and Replay**                        | ✅      | TBC                                                                                                             |                                                                                                                                                                                                                                                                            |                                                                                                                                |
 | **Unit Testing**                           | ✅      | TBC                                                                                                             |                                                                                                                                                                                                                                                                            |                                                                                                                                |
 
+## Part B. Game Design Pattern explanation
 
-## High Level Game Flow
+Before delving into the details, it is useful to provide an overview of the high-level game architecture - *bring it to life*.
 
-The following game diagram explains how the game flows.
+The game follows **Clean Architecture** principles throughout, ensuring that:
+* **All dependencies point inward** towards the stable **Domain Layer**.
+* The **Application Layer** orchestrates the domain.
+* The **Infrastructure Layer** provides concrete implementations.
+* The **Framework Layer** (Spring boot) sits on the outside and never leaks inward.
+
+Rules in the domain logic stay independent of Sprint Boot, console logging and concrete implementations, keeping the system **extensible, testable and stable** should new/updated variations or rules be added.
+
+## Architectural Overview - Game Flow
+```mermaid
+flowchart TD
+    subgraph Framework_Layer
+        Spring[Spring Boot Startup]
+    end
+
+    subgraph Infrastructure_Layer
+        Obs[ObserverConsoleLogger]
+        Factories[Factory Adapters & Gateways]
+    end
+
+    subgraph Application_Layer
+        Engine[GameEngine (Facade)]
+        Config[GameConfiguration]
+        Runners[Scenario Runners]
+    end
+
+    subgraph Domain_Layer
+        Board[GameBoard]
+        Dice[DiceShaker]
+        Strategies[End/Hit/Move Strategies]
+        StateMachine[GameState + States]
+        Player[Player]
+        Context[Player Contexts & Value Objects]
+    end
+
+    Spring --> Runners
+    Runners --> Config
+    Config --> Engine
+
+    Engine --> Board
+    Engine --> Dice
+    Engine --> Strategies
+    Engine --> StateMachine
+    Engine --> Context
+    Engine --> Player
+
+    Factories --> Board
+    Factories --> Dice
+    Factories --> Strategies
+    Obs --> Engine
+```
 ```mermaid
 flowchart TD
 A[1.Spring Boot Startup] --> B[2.RunGame / Scenario Runner]
@@ -49,7 +104,6 @@ I -->|Notifications| D
 ```
 This diagram acts as a backbone for the more detailed **explanation of the design patterns** and **principles applied**, and the **rationale** for them.
 
-## Part B. Game Design Pattern explanation
 
 ## 1. Spring Boot Startup (Framework layer)
 ### What it does
