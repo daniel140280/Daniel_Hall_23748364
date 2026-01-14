@@ -31,19 +31,25 @@ In order to demonstrate the features, run the game via the **FrustrationGameAppl
 | **Save and Replay**                        | ✅      | TBC                                                                                                             |                                                                                                                                                                                                                                                                            |                                                                                                                                |
 | **Unit Testing**                           | ✅      | TBC                                                                                                             |                                                                                                                                                                                                                                                                            |                                                                                                                                |
 
-## Part B. Game Design Pattern explanation
+## Part B. Game Explanation
+This will consist of 4 sections:
+1. Application of **Clean Architecture**.
+2. Application of **Design Patterns**.
+3. Application of **SOLID** principles.
+4. **Evaluation** of the implementation.
 
+# 1. **Clean Architecture**
 Before delving into the details, it is useful to provide an overview of the high-level game architecture - *bring it to life*.
 
-The game follows **Clean Architecture** principles throughout, ensuring that:
-* **All dependencies point inward** towards the stable **Domain Layer**.
+The game follows **Clean Architecture** principles throughout (through ports and adapters), ensuring that:
+* **All dependencies point inward** towards the stable part of the system - the **Domain Layer**.
 * The **Application Layer** orchestrates the domain.
 * The **Infrastructure Layer** provides concrete implementations.
 * The **Framework Layer** (Spring boot) sits on the outside and never leaks inward.
 
-Rules in the domain logic stay independent of Sprint Boot, console logging and concrete implementations, keeping the system **extensible, testable and stable** should new/updated variations or rules be added.
-
 ## Architectural Overview - Game Flow
+This diagram acts as a backbone for the more detailed **explanation of the design patterns** and **principles applied**, and the **rationale** for them.
+
 ```mermaid
 flowchart TD
     subgraph Framework_Layer
@@ -52,57 +58,69 @@ flowchart TD
 
     subgraph Infrastructure_Layer
         Obs[ObserverConsoleLogger]
-        Factories[Factory Adapters & Gateways]
+        Factories[Factory Adapters and Gateways]
     end
 
     subgraph Application_Layer
-        Engine[GameEngine - Facade]
+        Engine[GameEngine]
         Config[GameConfiguration]
-        Runners[Scenario Runners]
     end
 
     subgraph Domain_Layer
+        Strategies[Strategies End Hit Move]
+        StateMachine[State Machine]
+        ValueObjects[Player Contexts and Positions]
         Board[GameBoard]
         Dice[DiceShaker]
-        Strategies[End/Hit/Move Strategies]
-        StateMachine[GameState + States]
         Player[Player]
-        Context[Player Contexts & Value Objects]
     end
 
-    Spring --> Runners
-    Runners --> Config
+    Spring --> Engine
+    Obs --> Engine
+    Factories --> Config
     Config --> Engine
 
-    Engine --> Board
-    Engine --> Dice
     Engine --> Strategies
     Engine --> StateMachine
-    Engine --> Context
+    Engine --> ValueObjects
+    Engine --> Board
+    Engine --> Dice
     Engine --> Player
 
-    Factories --> Board
-    Factories --> Dice
-    Factories --> Strategies
-    Obs --> Engine
+    Strategies --> ValueObjects
+    Strategies --> Board
+    Strategies --> Player
+
+    StateMachine --> Engine
 ```
-```mermaid
-flowchart TD
-A[1.Spring Boot Startup] --> B[2.RunGame / Scenario Runner]
-B --> C[3.GameConfiguration]
-C --> D[4.GameEngine]
-D --> E[5.State Machine]
-D --> F[6.Move Strategy]
-D --> G[7.End & Hit Strategies]
-D --> H[8.Player Contexts]
-D --> I[9.Observers]
-E -->|Transitions| D
-F -->|Movement| D
-G -->|Rule Validation| F
-H -->|State Updates| F
-I -->|Notifications| D
-```
-This diagram acts as a backbone for the more detailed **explanation of the design patterns** and **principles applied**, and the **rationale** for them.
+>* ☑ Why is this important?
+>* The **Domain** consists of pure logic. No Spring, no factories or console in sight.
+>* The **Application** layer orchestrates the game, but contains no rules.
+>* The **Infrastructure** implements interfaces, but depends on the domain for concrete instantiations.
+>* The **Framework** (Spring) is replaceable and therefore sits independent of the core game.
+
+In essence, the Rules in the domain logic stay independent of Sprint Boot, console logging and concrete implementations, keeping the system **extensible, testable and stable** should new/updated variations or rules be added. 
+
+## Ports and Adapters - 'how game dependencies flow'
+
+EXPLAIN ABOUT CLEAN ARCHTIECTURE AND THE DOMAIN MODEL/ VOLATILE ELEMENTS ARE KEPT SEPERATE - following DIP.
+
+>* ☑ Why is this good?
+>* **All dependencies point inwards** towards the most stable part of the system - the **domain layer**, with all other aspects of the game dependent on it.
+>* This means rules can be added / updated without modifying existing logic. 
+>* Observers and factories can be replaced without touching the GameEngine - making it stable.
+>* Having clear separation of concerns make the game easily extensible and testable.
+
+### Clean Architecture summary table REMOVE THE SOLID BIT?:
+
+| Layer              | Purpose and Game example                                                                                                                                                                        | Clean Architecture and importance                                                                                                                                                                                                                                                                                                                                                                                                                      |
+|--------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Domain**         | The Core ("Rules of the Game") - pure business logic<br/> - board, dice, players, strategies, state machine.                                                                                    | Defines the rules of the game, yet contain no knowledge of Spring injection, configuration, factories or console output.<br/>**SRP** Each class has one job - clean and easily testable.<br/>**OCP** New rules are easily added without modifying existing domain classes. **DIP** Nothing in the domain depends on the out layers. Dependencies point inwards.                                                                                        |
+| **Application**    | Orchestrates ("How the Game runs") the Domain<br/> - GameEngine, GameConfiguration and ScenarioRunner/RunGameSimulations.                                                                       | Coordinates the game. Depends on Domain interfaces (abstract by nature) - never on Infrastructure, to determine what rules are applied (or not).<br/>**SRP** GameEngine will coordinate the game, but has no rule logic.<br/>**OCP** Adding new strategies, board etc, does not impact the GameEngine.<br/>**DIP** Application depends only on domain interfaces.                                                                                      |
+| **Infrastructure** | Implements the Domain interfaces and external concerns ("How the Game interacts with the User")<br/> - observers, factory adapters, gateways and concrete implementations of domain interfaces. | Dependent on Domain interface abstractions (ports) to implement the concrete boards, dic strategy instantiations - never the other way around, as well as the console output.<br/>**SRP** Each adapter is responsible for only one type of object.<br/>**OCP** Again, we can add new adapters without modifying the domain or application layers.<br/>**DIP** Infrastructure depends on the domain interface, not the other way round (point inwards). |
+| **Framework**      | The outermost ring that starts the application, wires up dependency injection and triggers the RunGame driving port<br/> - Sprint Boot and Dependency Injection configuration annotations.      | **SRP** Only responsible for the Spring bootstrap of the game.<br/>**DIP**Depends on everything else, but nothing should depend on it.<br/>**Clean Architecture** Framework layer is the most volatile, so cannot leak inward. DIP is vital!                                                                                                                                                                                                           | 
+
+# 2. **Design Patterns** - focus on Strategy, State, Factory, Observer and Facade Patterns
 
 
 ## 1. Spring Boot Startup (Framework layer)
@@ -342,69 +360,6 @@ Observers act as a critical part of the game architecture, implementing the Game
 | **ISP**   |                                                                                                                                   |                                                                |
 | **DIP**   | Game relies on inward dependencies, specifically on abstract interfaces, not concrete implementations.                            | Allows runtime configuration and testing.                      | 
 
-
-## Clean Architecture summary
-
-EXPLAIN ABOUT CLEAN ARCHTIECTURE AND THE DOMAIN MODEL/ VOLATILE ELEMENTS ARE KEPT SEPERATE - following DIP.
-
-The following summary table and **TBC UML** diagram highlight how Clean Architecture has been applied in this Frustration game.
-* It ensures **all dependencies point inwards** towards the most stable part of the system - the **domain layer**, with all other aspects of the game dependent on it.
->* This is good because rules can be added / updated without modifying existing logic. Observers and factories can be replaced without touching the GameEngine - making it stable. 
->* These clear separation of concerns make the game easily extensible and testable.
-
-### Clean Architecture demonstration of the game:
-
-```mermaid
-flowchart TD
-    subgraph Framework_Layer
-        Spring[Spring Boot Startup]
-    end
-
-    subgraph Infrastructure_Layer
-        Obs[ObserverConsoleLogger]
-        Factories[Factory Adapters and Gateways]
-    end
-
-    subgraph Application_Layer
-        Engine[GameEngine]
-        Config[GameConfiguration]
-    end
-
-    subgraph Domain_Layer
-        Strategies[Strategies End Hit Move]
-        StateMachine[State Machine]
-        ValueObjects[Player Contexts and Positions]
-        Board[GameBoard]
-        Dice[DiceShaker]
-        Player[Player]
-    end
-
-    Spring --> Engine
-    Obs --> Engine
-    Factories --> Config
-    Config --> Engine
-
-    Engine --> Strategies
-    Engine --> StateMachine
-    Engine --> ValueObjects
-    Engine --> Board
-    Engine --> Dice
-    Engine --> Player
-
-    Strategies --> ValueObjects
-    Strategies --> Board
-    Strategies --> Player
-
-    StateMachine --> Engine
-```
-### Game - Clean Architecture summary table:
-
-| Layer              | Purpose and Game example                                                                                                                                                                        | Clean Architecture and importance                                                                                                                                                                                                                                                                                                                                                                                                                      |
-|--------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Domain**         | The Core ("Rules of the Game") - pure business logic<br/> - board, dice, players, strategies, state machine.                                                                                    | Defines the rules of the game, yet contain no knowledge of Spring injection, configuration, factories or console output.<br/>**SRP** Each class has one job - clean and easily testable.<br/>**OCP** New rules are easily added without modifying existing domain classes. **DIP** Nothing in the domain depends on the out layers. Dependencies point inwards.                                                                                        |
-| **Application**    | Orchestrates ("How the Game runs") the Domain<br/> - GameEngine, GameConfiguration and ScenarioRunner/RunGameSimulations.                                                                       | Coordinates the game. Depends on Domain interfaces (abstract by nature) - never on Infrastructure, to determine what rules are applied (or not).<br/>**SRP** GameEngine will coordinate the game, but has no rule logic.<br/>**OCP** Adding new strategies, board etc, does not impact the GameEngine.<br/>**DIP** Application depends only on domain interfaces.                                                                                      |
-| **Infrastructure** | Implements the Domain interfaces and external concerns ("How the Game interacts with the User")<br/> - observers, factory adapters, gateways and concrete implementations of domain interfaces. | Dependent on Domain interface abstractions (ports) to implement the concrete boards, dic strategy instantiations - never the other way around, as well as the console output.<br/>**SRP** Each adapter is responsible for only one type of object.<br/>**OCP** Again, we can add new adapters without modifying the domain or application layers.<br/>**DIP** Infrastructure depends on the domain interface, not the other way round (point inwards). |
-| **Framework**      | The outermost ring that starts the application, wires up dependency injection and triggers the RunGame driving port<br/> - Sprint Boot and Dependency Injection configuration annotations.      | **SRP** Only responsible for the Spring bootstrap of the game.<br/>**DIP**Depends on everything else, but nothing should depend on it.<br/>**Clean Architecture** Framework layer is the most volatile, so cannot leak inward. DIP is vital!                                                                                                                                                                                                           | 
 
 
 # Reflection
