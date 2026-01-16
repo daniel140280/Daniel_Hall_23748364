@@ -161,15 +161,16 @@ Strategy Patterns are used to solve a problem. They encapsulate **volatile behav
 ### Example - Strategy Pattern demonstrated in the hit/end rules of the game
 ```mermaid
 classDiagram
-    direction LR
+    direction TB
 
+    %% Top Layer — High‑level module
     class GameEngine {
         - EndStrategy endStrategy
         - HitStrategy hitStrategy
         + playGame()
     }
 
-    %% Interfaces
+    %% Middle Layer — Abstractions (DIP)
     class EndStrategy {
         <<interface>>
         + isValidMove(...)
@@ -180,25 +181,22 @@ classDiagram
         + canMoveToPosition(...)
     }
 
-    %% End Strategies
+    %% Bottom Layer — Concrete Implementations
     class ExactEndStrategy
     class OvershootAllowedStrategy
 
-    %% Hit Strategies
     class AllowHitStrategy
     class ForfeitOnHitStrategy
 
-    %% Engine depends on abstractions
-    GameEngine --> EndStrategy : uses
-    GameEngine --> HitStrategy : uses
+    %% Relationships
+    GameEngine --> EndStrategy : depends on
+    GameEngine --> HitStrategy : depends on
 
-    %% Implementations
     ExactEndStrategy ..|> EndStrategy
     OvershootAllowedStrategy ..|> EndStrategy
 
     AllowHitStrategy ..|> HitStrategy
     ForfeitOnHitStrategy ..|> HitStrategy
-
 ```
 
 ### ☑ Why is this important?
