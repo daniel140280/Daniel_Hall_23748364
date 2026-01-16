@@ -113,15 +113,15 @@ In essence, the Rules in the domain logic stay independent of Sprint Boot, conso
 
 Clean Architecture is implemented using **ports and adapters**.
 
-| Concept              | What do they do?                                                                                                                                         | Game example                                                                                                                                                                                |
-|----------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Ports**            | **Interfaces** that *define what* the application needs. Two types:                                                                                      |                                                                                                                                                                                             |
-| -1.**Driving Ports** | External triggers that *drive* the application.<br/>APIs that call into the application. E.g. they *prod* the application code to do something.          | *StartUp* calls *RunGame.executeGame()*                                                                                                                                                     |
-| -2.**Driven Ports**  | Interfaces the application *depend on*.<br/>E.g. application uses these to 'do something'                                                                | DiceShaker, GameBoard, EndStrategy, HitStrategy and GameListener are all **interfaces**.                                                                                                    |
-| **Adapters**         | Perform the **concrete implementations** of driven ports.                                                                                                | SmallGameBoard and LargeGameBoard would be examples of **concrete implementations** for the GameBoard interface (driven port).<br/>Each adapter is responsible for only one type of object. |
-| **Gateways**         | Dispatchers that **map the user selected game configuration**, in the form of enums, **to adapters** that implement the correct concrete implementation. | BoardFactoryGateway and DiceFactoryGateway are two examples.                                                                                                                                |
+| Concept      | What do they do?                                                                                                                                                      | Game example                                                                                                                                                                                |
+|--------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Ports**    | **Interfaces** that *define what* the application needs. Two types:                                                                                                   |                                                                                                                                                                                             |
+|              | **Driving Ports**<br/>External triggers that *drive* the application.<br/>APIs that call into the application. E.g. they *prod* the application code to do something. | *StartUp* calls *RunGame.executeGame()*                                                                                                                                                     |
+|              | **Driven Ports**<br/>Interfaces the application *depend on*.<br/>E.g. application uses these to 'do something'                                                        | DiceShaker, GameBoard, EndStrategy, HitStrategy and GameListener are all **interfaces**.                                                                                                    |
+| **Adapters** | Perform the **concrete implementations** of driven ports.                                                                                                             | SmallGameBoard and LargeGameBoard would be examples of **concrete implementations** for the GameBoard interface (driven port).<br/>Each adapter is responsible for only one type of object. |
+| **Gateways** | Dispatchers that **map the user selected game configuration**, in the form of enums, **to adapters** that implement the correct concrete implementation.              | BoardFactoryGateway and DiceFactoryGateway are two examples.                                                                                                                                |
 
-### Example Game Board selection flow
+### Example: flow showing Game Board selection
 ```mermaid
 flowchart LR
     Enum[BoardOption Enum] --> Gateway(BoardFactoryGateway)
@@ -144,7 +144,7 @@ flowchart LR
 
 #######################################################################################
 
-# 2. **Design Patterns - where are they used and why?** (focus on Strategy, State, Factory, Observer and Facade Patterns)
+# 2. **Design Patterns - where are they used and why?**
 
 #######################################################################################
 
@@ -161,34 +161,44 @@ Strategy Patterns are used to solve a problem. They encapsulate **volatile behav
 ### Example - Strategy Pattern demonstrated in the hit/end rules of the game
 ```mermaid
 classDiagram
+    direction LR
+
     class GameEngine {
-        -EndStrategy endStrategy
-        -HitStrategy hitStrategy
-        +playGame()
+        - EndStrategy endStrategy
+        - HitStrategy hitStrategy
+        + playGame()
     }
 
+    %% Interfaces
     class EndStrategy {
         <<interface>>
-        +isValidMove(...)
+        + isValidMove(...)
     }
 
     class HitStrategy {
         <<interface>>
-        +canMoveToPosition(...)
+        + canMoveToPosition(...)
     }
 
+    %% End Strategies
     class ExactEndStrategy
     class OvershootAllowedStrategy
+
+    %% Hit Strategies
     class AllowHitStrategy
     class ForfeitOnHitStrategy
 
-    GameEngine --> EndStrategy
-    GameEngine --> HitStrategy
+    %% Engine depends on abstractions
+    GameEngine --> EndStrategy : uses
+    GameEngine --> HitStrategy : uses
 
+    %% Implementations
     ExactEndStrategy ..|> EndStrategy
     OvershootAllowedStrategy ..|> EndStrategy
+
     AllowHitStrategy ..|> HitStrategy
     ForfeitOnHitStrategy ..|> HitStrategy
+
 ```
 
 ### ☑ Why is this important?
@@ -315,35 +325,65 @@ The GameEngine facade will take a clients *used cased* (game selection), then:
 
 ```mermaid
 classDiagram
-class StatelessFacade {
-+play() int
-}
+    direction TB
 
-    class DiceShaker {
-        <<interface>>
-        +shake() int
+    %% Facade
+    class GameEngine {
+        - DiceShaker dice
+        - GameBoard board
+        - EndStrategy endStrategy
+        - HitStrategy hitStrategy
+        - GameState state
+        + playGame()
+        + takeTurn()
     }
 
-    class RandomSingleDiceShaker {
-        +shake() int
+    %% Core Interfaces
+    class DiceShaker {
+        <<interface>>
+        + shake() int
     }
 
     class GameBoard {
         <<interface>>
-        +advance(int)
-        +getCurrentPosition() int
+        + nextPosition(int, boolean) PlayersPosition
     }
 
-    class NonObservedGameBoard {
-        -index int
-        +advance(int)
-        +getCurrentPosition() int
+    class EndStrategy {
+        <<interface>>
+        + isValidMove(...)
     }
 
-    StatelessFacade --> DiceShaker : creates & uses
-    StatelessFacade --> GameBoard : creates & uses
+    class HitStrategy {
+        <<interface>>
+        + canMoveToPosition(...)
+    }
+
+    class GameState {
+        <<interface>>
+        + next(GameEngine)
+    }
+
+    %% Implementations (examples)
+    class RandomSingleDiceShaker
+    class SmallGameBoard
+    class ExactEndStrategy
+    class AllowHitStrategy
+    class InPlayState
+
+    %% Relationships
+    GameEngine --> DiceShaker : uses
+    GameEngine --> GameBoard : uses
+    GameEngine --> EndStrategy : uses
+    GameEngine --> HitStrategy : uses
+    GameEngine --> GameState : delegates
+
     DiceShaker <|.. RandomSingleDiceShaker
-    GameBoard <|.. NonObservedGameBoard
+    GameBoard <|.. SmallGameBoard
+    EndStrategy <|.. ExactEndStrategy
+    HitStrategy <|.. AllowHitStrategy
+    GameState <|.. InPlayState
+
 ```
 
 ### ☑ Why is this important?
@@ -604,6 +644,8 @@ That said, the game demonstrates Clean Architecture, SOLID principles, and stron
   * The domain remains clean.
 
 ## What could I have done differently?
+Aside from writing a shorter README (*sorry for that*)....
+
 * **Package Structure** - if time allowed, it may have been prudent to restructure the package structure to a more explicit Clean Architecture folder layout to increase readability.
   * For example:
     - board, dice, players, gamestrategies → domain
@@ -612,18 +654,15 @@ That said, the game demonstrates Clean Architecture, SOLID principles, and stron
     - boot → framework
     
 * **Decorator Pattern**
-It was feasible that some rule combinations could benefit from the Decorator Pattern, i.e. penalties layered on top of hit rules. In this basic game it was discounted, but arguably it would allow rule composition, without modifying existing strategies.
+  * It was feasible that some rule combinations could benefit from the Decorator Pattern, i.e. penalties layered on top of hit rules. In this basic game it was discounted, but arguably it would allow rule composition, without modifying existing strategies.
 
 * **Use of Records**
    
-As noted previously, Players could be implemented as records and they remain a feasible option. On this occasion,the current design seemed appropriate.
+  * As noted previously, Players could be implemented as records and they remain a feasible option. On this occasion,the current design seemed appropriate.
 
 * **Save and Replay** - unique ID
 
-As this is a basic example to show the functionality, the game uses a rather large ID to save the game to ensure the client can find the specific game they wish to replay. It was feasible to add a basic incremental ID, but for the purposes of this game, it explicitly highlights the game configuration chosen and assigns a unique ID - overkill, but it works.
+  * As this is a basic example to show the functionality, the game uses a rather large ID to save the game to ensure the client can find the specific game they wish to replay. It was feasible to add a basic incremental ID, but for the purposes of this game, it explicitly highlights the game configuration chosen and assigns a unique ID - overkill, but it works.
 
 * **Explicit Error Handling**
-The majority of the game makes the assumption everything is a valid configuration. Adding further error handling might prove more robust, especially should the game be further extended.
-
-
-
+  * The majority of the game makes the assumption everything is a valid configuration. Adding further error handling might prove more robust, especially should the game be further extended.
