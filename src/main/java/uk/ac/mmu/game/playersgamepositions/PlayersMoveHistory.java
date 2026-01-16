@@ -6,7 +6,7 @@ import java.util.List;
 
 //Value Object to keep abreast of a Players game moves.
 public class PlayersMoveHistory {
-    private final List<String> history = new ArrayList<>();
+    private List<String> history = new ArrayList<>();
 
     //Method to update the Player moves history as the game progresses.
     public void add(String move) {

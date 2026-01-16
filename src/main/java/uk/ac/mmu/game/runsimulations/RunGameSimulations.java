@@ -1,5 +1,6 @@
 package uk.ac.mmu.game.runsimulations;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.ac.mmu.game.gameconfig.*;
 import uk.ac.mmu.game.gameobserver.GameListener;
@@ -17,10 +18,12 @@ Uses gateways/adapters to build configuration.
  */
 @Component
 public class RunGameSimulations {
+    @Autowired
+    private ObserverConsoleLogger consoleLogger;
 
     public void runAllGameSimulations(){
 
-        List<GameListener> listeners = List.of(new ObserverConsoleLogger());
+        List<GameListener> listeners = List.of(consoleLogger);
 
         // Loop through all game variations.
         for(PlayerOption playerOption : PlayerOption.values()){
@@ -33,6 +36,11 @@ public class RunGameSimulations {
                             System.out.println("--------------Running simulation--------------\n");
                             System.out.printf("Game consists of %s players, %s dice, a %s board, the Hit strategy is %s and %s End strategy is played", playerOption, diceOption, boardOption, hitOption, endOption);
                             System.out.println(); //Blank line added for improved visibility.
+
+                            //Adding saving of game - name is long, but assuming id not sufficient to locate game to replay?
+                            String uniqueID = java.util.UUID.randomUUID().toString().substring(0, 8);
+                            String gameName = uniqueID + "_"+ playerOption + "_" + diceOption + "_" + boardOption + "_" + hitOption + "_" + endOption;
+                            consoleLogger.setRunName(gameName);
 
                             //Game simulations now constructed directly through Game set-up enums.
                             GameEngine engine = new GameEngine(playerOption, diceOption, boardOption, hitOption, endOption, listeners);
