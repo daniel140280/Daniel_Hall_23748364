@@ -14,7 +14,7 @@ The focus is on **why the system is designed and built that way**. The design is
 
 ## Part A. Variations implemented
 
-The game demonstrates all required features and variations (see below table).
+The game demonstrates all required features and variations (see below table)..
 In order to demonstrate the features, run the game via the **FrustrationGameApplication** class. This will **run two simulations** at runtime.
 > 1. **All Game Simulations** - a nested loop will run every combination of board, dice, players and end/hit game strategies.
 > 2. **The Scenario Runner** uses fixed dice to demonstrate each of the variations as per the assignment spec.
