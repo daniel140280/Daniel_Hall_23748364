@@ -3,7 +3,7 @@
 
 This README explains the **design patterns, architecture** and **implementation decisions** used in the Frustration board game. It assumes the reader is a professional with an implied knowledge of design patterns, SOLID principles and clean architecture - meaning these will not be explicitly explained.
 The document is split into two parts:
-* **Part A** documents the variations implemented and summarises the design patterns used. 
+* **Part A** documents the variations implemented and summarises the design patterns used.
 * **Part B** performs a deep-dive into the game flow, providing a more comprehensive view of the design patterns used, how SOLID and Clean Architecture principles are applied and more.
 
 The focus is on **why the system is designed and built that way**. The design is intentionally modular to enable the game to be extensible and testable, following:
@@ -19,17 +19,17 @@ In order to demonstrate the features, run the game via the **FrustrationGameAppl
 > 1. **All Game Simulations** - a nested loop will run every combination of board, dice, players and end/hit game strategies.
 > 2. **The Scenario Runner** uses fixed dice to demonstrate each of the variations as per the assignment spec.
 
-| Feature                                    | Status | Implementation Details (the code)                                                                               | Why this design is good?                                                                                                                                                                                                                                                   | SOLID principles demonstrated                                                                                                  |
-|--------------------------------------------|--------|-----------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------------------------|
-| **Dice** - single and double dice          | ✅      | RandomSingleDiceShaker, <br/>RandomDoubleDiceShaker, <br/>FixedDiceShaker <br/>*created via* DiceFactoryGateway | - Dice behaviour is abstracted behind an Interface, with concrete dice implementations determined at runtime via gateways/adapters.<br/>- No game engine changes required.<br/>- Independent and extensible.                                                               | **OCP** - easy to add / update dice types.<br/>**DIP** - engine depends on DiceShaker interface.<br/>**SRP** - dice only roll. |
-| **Players** - 2 and 4 player               | ✅      | RedPlayer, <br/>BluePlayer, <br/>GreenPlayer, <br/>YellowPlayer <br/>*created via* PlayerFactoryGateway         | - Player creation is abstracted behind an Interface, again this works best to allow concrete implementation at runtime.<br/>- Adding further players requires no changes to the game engine.<br/>Players are simple value objects.                                         | Similar principles to above. **OCP, DIP** and **SRP** compliant. **Encapsulation**                                             |
-| **Board** - small and large                | ✅      | SmallGameBoard, <br/>LargeGameBoard <br/>*created via* BoardFactoryGateway                                      | - Board geometry uses Interfaces, with adapters/gateways delivering the implementation requested at runtime.<br/>- Movement logic is modular and is distinct from the game engine.<br/>Boards are stateless value objects.                                                 | Similar principles to above. **OCP, DIP** and **SRP** compliant. **Polymorphism**                                              |
-| **End** - exact end or overshoot           | ✅      | ExactEndStrategy vs. <br/>OvershootAllowedStrategy <br/>*created via* EndFactoryGateway                         | - Uses Strategy Patterns.<br/>- End rules are isolated, avoiding complex if/else logic.<br/>- Easy to add or update end strategies.<br/>- Clean separation of rules.<br/>No logic in the game engine, making changes independent and increasingly extensible and testable. | **Strategy pattern, OCP** and **DIP** compliant. **LSP**                                                                       |
-| **Hit** - allow or forfeit                 | ✅      | ForfeitOnHitStrategy vs.<br/> AllowHitStrategy <br/>*created via* HitFactoryGateway                             | - Uses Strategy Patterns.<br/>- Collision rules are isolated, avoiding complex if/else logic.<br/>- Easy to add or update hit strategies.<br/>- No logic in the game engine, making changes independent and increasingly extensible and testable.                          | Similar principles to above. **Strategy pattern, OCP** and **DIP** compliant. **LSP**                                          |
-| **Game State** - Ready, In Play, Game Over | ✅      | ReadyState, <br/>InPlayState, <br/>GameOverState                                                                | - Prevents invalid transitions - verifies logic.<br/>- Simple, avoiding complex if/else logic.<br/>- Independent, allowing further states to be added easily.                                                                                                              | **State pattern, SRP** and **OCP** compliant. **LSP**                                                                          |
-| **Dependency Injection**                   | ✅      | Spring Boot annotations<br/> (e.g @Component, @Service, @Autowired)                                             | - Spring Boot dependency injection manages the lifecycle of runners and services.<br/>- Framework is isolated.                                                                                                                                                             | Clean Architecture - **DIP** and **SRP** compliant.                                                                            |
-| **Save and Replay**                        | ✅      | TBC                                                                                                             |                                                                                                                                                                                                                                                                            |                                                                                                                                |
-| **Unit Testing**                           | ✅      | TBC                                                                                                             |                                                                                                                                                                                                                                                                            |                                                                                                                                |
+| Feature                                    | Status | Implementation Details (the code)                                                                               | Why this design is good?                                                                                                                                                                                                                                                   |
+|--------------------------------------------|--------|-----------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Dice** - single and double dice          | ✅      | RandomSingleDiceShaker, <br/>RandomDoubleDiceShaker, <br/>FixedDiceShaker <br/>*created via* DiceFactoryGateway | - Dice behaviour is abstracted behind an Interface, with concrete dice implementations determined at runtime via gateways/adapters.<br/>- No game engine changes required.<br/>- Independent and extensible.                                                               |
+| **Players** - 2 and 4 player               | ✅      | RedPlayer, <br/>BluePlayer, <br/>GreenPlayer, <br/>YellowPlayer <br/>*created via* PlayerFactoryGateway         | - Player creation is abstracted behind an Interface, again this works best to allow concrete implementation at runtime.<br/>- Adding further players requires no changes to the game engine.<br/>Players are simple value objects.                                         |
+| **Board** - small and large                | ✅      | SmallGameBoard, <br/>LargeGameBoard <br/>*created via* BoardFactoryGateway                                      | - Board geometry uses Interfaces, with adapters/gateways delivering the implementation requested at runtime.<br/>- Movement logic is modular and is distinct from the game engine.<br/>Boards are stateless value objects.                                                 |
+| **End** - exact end or overshoot           | ✅      | ExactEndStrategy vs. <br/>OvershootAllowedStrategy <br/>*created via* EndFactoryGateway                         | - Uses Strategy Patterns.<br/>- End rules are isolated, avoiding complex if/else logic.<br/>- Easy to add or update end strategies.<br/>- Clean separation of rules.<br/>No logic in the game engine, making changes independent and increasingly extensible and testable. |
+| **Hit** - allow or forfeit                 | ✅      | ForfeitOnHitStrategy vs.<br/> AllowHitStrategy <br/>*created via* HitFactoryGateway                             | - Uses Strategy Patterns.<br/>- Collision rules are isolated, avoiding complex if/else logic.<br/>- Easy to add or update hit strategies.<br/>- No logic in the game engine, making changes independent and increasingly extensible and testable.                          |
+| **Game State** - Ready, In Play, Game Over | ✅      | ReadyState, <br/>InPlayState, <br/>GameOverState                                                                | - Prevents invalid transitions - verifies logic.<br/>- Simple, avoiding complex if/else logic.<br/>- Independent, allowing further states to be added easily.                                                                                                              |
+| **Dependency Injection**                   | ✅      | Spring Boot annotations<br/> (e.g @Component, @Service, @Autowired)                                             | - Spring Boot dependency injection manages the lifecycle of runners and services.<br/>- Framework is isolated.                                                                                                                                                             |
+| **Save and Replay**                        | ✅      | TBC                                                                                                             |                                                                                                                                                                                                                                                                            |
+| **Unit Testing**                           | ✅      | TBC                                                                                                             |                                                                                                                                                                                                                                                                            |
 
 ## Part B. Game Explanation
 This will consist of 4 sections:
@@ -99,7 +99,7 @@ flowchart TD
 >* The **Infrastructure** implements interfaces, but depends on the domain for concrete instantiations.
 >* The **Framework** (Spring) is replaceable and therefore sits independent of the core game.
 
-In essence, the Rules in the domain logic stay independent of Sprint Boot, console logging and concrete implementations, keeping the system **extensible, testable and stable** should new/updated variations or rules be added. 
+In essence, the Rules in the domain logic stay independent of Sprint Boot, console logging and concrete implementations, keeping the system **extensible, testable and stable** should new/updated variations or rules be added.
 
 ### Clean Architecture summary table REMOVE THE SOLID BIT and integrate with above and below?:
 
@@ -108,7 +108,7 @@ In essence, the Rules in the domain logic stay independent of Sprint Boot, conso
 | **Domain**         | The Core ("Rules of the Game") - pure business logic<br/> - board, dice, players, strategies, state machine.                                                                                    | Defines the rules of the game, yet contain no knowledge of Spring injection, configuration, factories or console output.<br/>**SRP** Each class has one job - clean and easily testable.<br/>**OCP** New rules are easily added without modifying existing domain classes. **DIP** Nothing in the domain depends on the out layers. Dependencies point inwards.                                                                                        |
 | **Application**    | Orchestrates ("How the Game runs") the Domain<br/> - GameEngine, GameConfiguration and ScenarioRunner/RunGameSimulations.                                                                       | Coordinates the game. Depends on Domain interfaces (abstract by nature) - never on Infrastructure, to determine what rules are applied (or not).<br/>**SRP** GameEngine will coordinate the game, but has no rule logic.<br/>**OCP** Adding new strategies, board etc, does not impact the GameEngine.<br/>**DIP** Application depends only on domain interfaces.                                                                                      |
 | **Infrastructure** | Implements the Domain interfaces and external concerns ("How the Game interacts with the User")<br/> - observers, factory adapters, gateways and concrete implementations of domain interfaces. | Dependent on Domain interface abstractions (ports) to implement the concrete boards, dic strategy instantiations - never the other way around, as well as the console output.<br/>**SRP** Each adapter is responsible for only one type of object.<br/>**OCP** Again, we can add new adapters without modifying the domain or application layers.<br/>**DIP** Infrastructure depends on the domain interface, not the other way round (point inwards). |
-| **Framework**      | The outermost ring that starts the application, wires up dependency injection and triggers the RunGame driving port<br/> - Sprint Boot and Dependency Injection configuration annotations.      | **SRP** Only responsible for the Spring bootstrap of the game.<br/>**DIP**Depends on everything else, but nothing should depend on it.<br/>**Clean Architecture** Framework layer is the most volatile, so cannot leak inward. DIP is vital!                                                                                                                                                                                                           | 
+| **Framework**      | The outermost ring that starts the application, wires up dependency injection and triggers the RunGame driving port<br/> - Sprint Boot and Dependency Injection configuration annotations.      | **SRP** Only responsible for the Spring bootstrap of the game.<br/>**DIP**Depends on everything else, but nothing should depend on it.<br/>**Clean Architecture** Framework layer is the most volatile, so cannot leak inward. DIP is vital!                                                                                                                                                                                                           |
 
 
 ## Ports and Adapters - 'how game dependencies flow'
@@ -123,9 +123,9 @@ Clean Architecture is implemented using **ports and adapters**.
 | -1.**Driving Ports** | External triggers that *drive* the application.<br/>APIs that call into the application. E.g. they *prod* the application code to do something.          | *StartUp* calls *RunGame.executeGame()*                                                                                                                                                     |
 | -2.**Driven Ports**  | Interfaces the application *depend on*.<br/>E.g. application uses these to 'do something'                                                                | DiceShaker, GameBoard, EndStrategy, HitStrategy and GameListener are all **interfaces**.                                                                                                    |
 | **Adapters**         | Perform the **concrete implementations** of driven ports.                                                                                                | SmallGameBoard and LargeGameBoard would be examples of **concrete implementations** for the GameBoard interface (driven port).<br/>Each adapter is responsible for only one type of object. |
-| **Gateways**         | Dispatchers that **map the user selected game configuration**, in the form of enums, **to adapters** that implement the correct concrete implementation. | BoardFactoryGateway and DiceFactoryGateway are two examples.                                                                                                                                | 
+| **Gateways**         | Dispatchers that **map the user selected game configuration**, in the form of enums, **to adapters** that implement the correct concrete implementation. | BoardFactoryGateway and DiceFactoryGateway are two examples.                                                                                                                                |
 
-### Example of of the dependency flow for the Game Board selection (small/large)
+### Example of the dependency flow for the Game Board selection (small/large)
 ```mermaid
 flowchart LR
     Enum[BoardOption Enum] --> Gateway(BoardFactoryGateway)
@@ -158,7 +158,7 @@ EXAMPLE
 
 ## B. **State Pattern** - *controlling the Game lifecycle*
 
-The State Machine **controls the game lifecycle**. 
+The State Machine **controls the game lifecycle**.
 
 This game deploys a fairly simplistic state machine utilising only 3 states. (**TBC CHECK UNI MATERIAL** **ALSO REFERENCE THE FACT IF ALLOWS TO SAY GAME OVER IF FORCE ANOTHER DICE ROLL, PROVEN USING A TEST CASE - SPECIFY WHICH ONE.**)
 1. **ReadyState**
@@ -185,27 +185,86 @@ stateDiagram-v2
 
 
 EXAMPLE
-## D. **Observer Pattern** - **
+
+## D. **Observer Pattern** - *for output*
 
 Observers act as a critical part of the game architecture, implementing the GameListener interface, to receive notifications about the game progress.
-* They act as side-effect handlers, **decoupling game logic from the UI** (console output).
+
+* Within the game, the observer **receives moves, blocked moves, state transitions and game over events - outputting these to the console**.
 
 **NEED EXAMPLE TBC**
+### Example of the State Machine for this game
+```mermaid
+classDiagram
+    GameEngine --> GameListener
+    GameObserver ..|> GameListener
+```
 
-### ☑ Why is this important for the design
-* By using an observer pattern, means the GameEngine can focus on being a **facade** that coordinates everything, **without containing any business rules/logic, nor any console logic**.
-* Like all areas of this game, Observers have their job, and it is kept separate from other facets of the game.
+### ☑ Why is this important?
+>* By using an observer pattern, allows the GameEngine to focus on being a **facade** that coordinates everything, **without containing any business rules/logic, nor any console logic**.
+>* Like all areas of this game, Observers have their job, and it is kept **separate from other facets of the game**.
 >* The strength of this approach, is observer have one job, that is to provide an update of the game to the user - keeping responsibilities clean. Maintaining **SRP**.
->* New observers can be added, updated and swapped out. The GameEngine does not need to change, it merely notifies listeners fulfilling the **OCP**. Because all observers follow the same contract and can replace one another, it is in line with the **LSP**.
+>* New **observers can be added, updated and swapped out (i.e. console could be replaced with GUI, file logging)**. The **GameEngine does not need to change**, it merely notifies listeners fulfilling the **OCP**. Because all observers follow the same contract and can replace one another, it is in line with the **LSP**.
 >* As with all elements of this game, dependencies are inward pointing -**DIP**- the GameEngine knows nothing about the console output, it depends on the GameListener.
 
 
-## E. **Facade Pattern** - **
+## E. **Facade Pattern** - *GameEngine*
+
+Facades are a thing of beauty that can *hide a multitude of sins and complexity* behind it.
+
++ The **GameEngine acts as a facade** within the game - acting as a front-door.
++ GameEngine provides a simple and unified class - integral to **orchestrating the complexities of the game** behind it.
+
+The GameEngine facade will take a users used cased (game selection), then:
+* Creates the **PlayersPosition** and wraps them in the **PlayersInGameContext**, which is used to monitor and track the movement of each player during the game.
+* Delegates movement of players to the **Move Strategy**, based on the rule strategies deployed in the Game Configuration.
+* Delegates game rules to the **Hit / End Strategies**, again determined in the Game Configuration.
+* Delegates the game lifecycle to the **State Machine**, which orchestrates the state transition updates.
+* Delegates notification to **Observers**, which output player/game updates accordingly to the game specification.
+
+EXAMPLE REAL ONE
+
+```mermaid
+classDiagram
+class StatelessFacade {
++play() int
+}
+
+    class DiceShaker {
+        <<interface>>
+        +shake() int
+    }
+
+    class RandomSingleDiceShaker {
+        +shake() int
+    }
+
+    class GameBoard {
+        <<interface>>
+        +advance(int)
+        +getCurrentPosition() int
+    }
+
+    class NonObservedGameBoard {
+        -index int
+        +advance(int)
+        +getCurrentPosition() int
+    }
+
+    StatelessFacade --> DiceShaker : creates & uses
+    StatelessFacade --> GameBoard : creates & uses
+    DiceShaker <|.. RandomSingleDiceShaker
+    GameBoard <|.. NonObservedGameBoard
+```
+
+### ☑ Why is this important?
+>* The GameEngine is a **facade**. It acts as a front, that coordinates everything, **without ever containing any business rules/logic**.
+>* It **hides complexity** - keeping the GameEngine small and readable.
+>* This makes this approach highly testable, as demonstrated through the use of fixed dice and mock test scenarios.
+>* The strength of this is it **reduces coupling** - there is no duplicated logic, and rule logic retains separate and easily interchangeable without impacting the game engine itself (**in line with SRP**).
 
 
-EXAMPLE
-
-
+#################
 
 ## 1. Spring Boot Startup (Framework layer)
 ### What it does
@@ -215,7 +274,7 @@ EXAMPLE
 * No domain class will import Spring.
 
 ### ☑ Why is this important for the design
-* Spring Boot Dependency Injection provides a cleaner Architectural Framework, often mandatory for building enterprise applications. 
+* Spring Boot Dependency Injection provides a cleaner Architectural Framework, often mandatory for building enterprise applications.
 * The application uses the Spring Boot Framework for Dependency Injection, wiring everything together, holding bean definitions and instances and managing the lifecycle.
 * Maintains the framework in the 'outer ring', while keeping the core domain logic isolated from the Spring framework itself.
 * Supports Clean Architecture and the dependency rule: **Framework -> Infrastructure -> Application -> Domain**.
@@ -223,7 +282,7 @@ EXAMPLE
 
 ## 2. Run Game / Scenario Runner (Driving Ports)
 ### What it does
-* Driving ports **prod the application code 'to do something'**. 
+* Driving ports **prod the application code 'to do something'**.
 * In this case, these classes **drive** the application by selecting which scenarios are run (**ScenarioRunner and RunGameSimulations**).
 * This in turn creates *GameConfiguration* objects that are injected via Spring during application StartUp.
 
@@ -231,23 +290,8 @@ EXAMPLE
 * Keeps scenario configuration logic separate from the actual game logic - users specify what variations of the game they want to run centrally, without impacting the actual game set-up and logic.
 * Allows the addition of new scenarios to be implemented easily.
 * Fully aligns to **Single Responsibility Principles (SRP)** and **Open/Closed principles** and improves game extensibility.
-* Dependency Injection (as should always be the case) points inwards - **TBC to validate if true and WHY IMPORTANT , removing reliance ON ......** 
+* Dependency Injection (as should always be the case) points inwards - **TBC to validate if true and WHY IMPORTANT , removing reliance ON ......**
 >* The strength here is that there is no hard-coded game configuration scenarios within the game engine, nor duplication of set-up logic.
-
-
-## 4. Game Engine (Application Layer)
-The GameEngine is integral, it **orchestrates the Frustration game**.
-After receiving the users selection, it:
-* Creates the **PlayersPosition** and wraps them in the **PlayersInGameContext**, which is used to monitor and track the movement of each player during the game.
-* Delegates movement of players to the **Move Strategy**, based on the rule strategies deployed in the Game Configuration.
-* Delegates game rules to the **Hit / End Strategies**, again determined in the Game Configuration.
-* Delegates the game lifecycle to the **State Machine**, which orchestrates the state transition updates.
-* Delegates notification to **Observers**, which output player/game updates accordingly to the game specification.
-
-### ☑ Why is this important for the design
-* The GameEngine is a **facade**. It acts as a front, that coordinates everything, **without ever containing any business rules/logic**.
-* This makes this approach highly testable, as demonstrated through the use of fixed dice and mck test scenarios.
->* The strength of this is, there is no duplicated logic, and rule logic retains separate and easily interchangeable without impacting the game engine itself (**in line with SRP**).
 
 
 ## 6. Move Strategy (Strategy Layer logic / Domain Service)
@@ -274,7 +318,7 @@ As with many game designs, they often involve the **need to handle different rul
 ### ☑ Why is this important for the design
 * The GameEngine depends only on abstractions (i.e. EndStrategy), not the details (e.g ExactEndStrategy), with strategies being determined and instantiated at runtime. This demonstrates the Dependency Inversion Principle (DIP).
 * **End and Hit strategies can be amended / extended independently** without impacting the MoveStrategy class,as it relies on the abstract interface class.
->* The strength of this design, is each strategy is isolated (it does one thing), in line with the **Single Responsibility Principle**. 
+>* The strength of this design, is each strategy is isolated (it does one thing), in line with the **Single Responsibility Principle**.
 >* Adding new rules, such as a *'winning rule'* (e.g. player must roll a 6 to finish) can be created, without modifying the existing GameEngine code. This aligns to the **Open/Closed Principle (OCP)**.
 >* Furthermore, **further movement rules can simply be plugged in** at runtime, making it easily extensible and testable. It therefore, also follows the **Dependency Inversion Principle (DIP)** where dependencies point inward (**TBC and simpler diagram**).
 
@@ -351,7 +395,105 @@ Player Contexts are an integral part of the **domain model**. The *PlayersInGame
 >* Domain invariants are enforced, meaning players cannot finish twice for example. These rules are protected by encapsulation.
 
 
-### TBC WRONG PLACE? Strategy follows the Dependency Inversion Principle - demonstrated below:
+# 3. **SOLID principles - where are they applied**
+
+## S - **Single Responsibility Principle** (SRP)
+
+# BRIEF ONE-LINER ON SRP AND EXAMPLE
+Each component is **responsible for *one thing***.
+
+### Examples of **where it is applied**:
+* **Dice** classes *only* manage rolls,
+* **Strategies** *only* implement specific rule logic,
+* **State Machine** controls lifecycle,
+* **Observers** *only* output event information, and
+* **GameEngine** *only* orchestrates.
+
+### ☑ Why is this important for the design
+>* Each component has a **single reason to change**.
+>* This make these components **easier to test**.
+>* Components are **easier to extend / modify**, without impacting other facets of the game.
+
+## O - **Open / Closed Principle** (OCP)
+
+# BRIEF ONE-LINER ON ocp AND EXAMPLE
+The system is **open for extension**, but **closed for modification**.
+
+### Examples of **where it is applied**:
+* **Game set-up** focuses heavily on OCP:
+* For example, adding new:
+* - **Dice** types,
+* - **Boards**,
+* - **Rule Strategies**,
+* - **States**,
+* - **Observers**.....are all **open for change**, **without modifying existing code**, which is closed.
+
+### ☑ Why is this important for the design
+>* Fundamentally, there is the **ability to add / update rules without modifying existing code**.
+>* This is made possible in the game design through the use of **interfaces**, which enable changes to be **open** to modification.
+>* Meanwhile, the GameEngine and other areas of the game are **closed to modifications**, and remain unchanged.
+
+## L - **Liskov Substitute Principle** (LSP)
+
+# BRIEF ONE-LINER ON LRP AND EXAMPLE
+Any **implementation can replace another** without breaking the system - a *substitution* if you will.
+
+### Examples of **where it is applied**:
+* Interfaces are used for game logic and strategy, because these tend to be more volatile and require new concrete implementations or modifications over time.
+* For that reason, **any concrete implementation of an interface** can be easily **replaced by another concrete implementation** without breaking the rest of the game.
+* Therefore, this means:
+* Any **DiceShaker** can be swapped and used -> without impacting the engine.
+* Any **EndStrategy** or **HitStrategy** can be swapped and used -> without impacting the MoveStrategy.
+* Any **Player** can be swapped and used -> without impacting the game configuration.
+* Any **GameBoard** can be swapped and used -> without impacting the game configuration.
+* Any **GameState** can be swapped and used -> without impacting the game engine.
+
+### ☑ Why is this important for the design
+>* Polymorphism makes substitution feasible.
+>* The game is currently set with a specific game configuration, and a limited number of game rules.....but that doesn't mean this won't change.
+>* Using **interfaces allows concrete implementations to be substituted** in/out **without impacting the rest of the game**.
+>* This means the game can easily be extended and tested.
+>* Polymorphism through interfaces provides a **level of standardisation** and **prevents side-effects**.
+
+## I - **Interface Segregation Principle** (ISP)
+
+# BRIEF ONE-LINER ON IRP AND EXAMPLE
+
+ISP is concerned about each and every **interface** being **small and focused** on the task at hand..
+
+### Examples of **where it is applied**:
+* We have already touched upon Interfaces previously, buto bring the ISP to life, the small and focused interfaces deployed in the game include:
+* **DiceShaker** only rolls dice.
+* **EndStrategy** only handles end-rule strategy.
+* **HitStrategy** only handles collision (hit-rule) strategy.
+* **Player** only manages the player config requirements.
+* **GameBoard** only manages the board geometry.
+* **GameState** only manages the lifecycle of the game.
+
+### ☑ Why is this important for the design
+>* Maintaining small and focused interfaces, mean clients depend only on what they actually use - **avoiding *bloated* interfaces**.
+>* Interfaces are **easy to implement**, with the concrete implementations being kept separate from the 'front-end' client interface.
+>* They also remain easy to mock and test.
+
+## D - **Dependency Inversion Principle** (DIP)
+
+# BRIEF ONE-LINER ON DIP AND EXAMPLE
+
+DIP is possibly the most important principle applied in the game.
+The purpose of DIP is to ensure the GameEngine depends only on **abstractions**, not concrete classes.
+**TBC** WHAT DOES THIS MEAN IN PRACTISE DEPENDENCIES POINT INWARD - WHAT DOES THIS MEAN
+
+### Examples of **where it is applied**:
+* **GameEngine** *depends on* **DiceShaker** interface, not any concrete implementation (i.e. RandomSingleDiceShaker).
+* **GameEngine** *depends on* **EndStrategy** interface, not any concrete implementation (i.e. ExactEndStrategy).
+* **GameEngine** *depends on* **HitStrategy** interface, not any concrete implementation (i.e. AllowHitStrategy).
+* **GameEngine** *depends on* **Player** interface, not any concrete implementation (i.e. RedPlayer).
+* **GameEngine** *depends on* **GameBoard** interface, not any concrete implementation (i.e. SmallGameBoard).
+* **GameEngine** *depends on* **HitStrategy** interface, not any concrete implementation (i.e. AllowHitStrategy).
+* **Observers** *depend on* **GameListener** interface, not any console logging.
+
+BAD EXAMPLE
+### Example of Dependency Inversion Principle demonstrated below:
 ```mermaid
 classDiagram
     class PlayersInGameContext {
@@ -376,37 +518,55 @@ classDiagram
 
 ```
 
+### ☑ Why is this important for the design
+>* The Dependency Inversion Principle is a valuable principle in the game design, and is the **bedrock of the Clean Architecture - Ports and Adapters design**.
+>* It allows **runtime configuration and testing**.
+>* Makes the game more **extensible and testable**.
+>* Keeps the game domain **independent of the infrastructure**.
 
 ## Summary of key SOLID designs
 
-| Principle | Application                                                                                                                       | What is the importance?                                        |
-|-----------|-----------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------|
-| **SRP**   | Dice *only* manages rolls, strategies *only* decide rule application, observers *only* output and GameEngine *only* orchestrates. | Each class is responsible for one thing.                       |
-| **OCP**   | Game set-up (dice, board, player, states and strategies).                                                                         | Ability to add / update rules without modifying existing code. |
-| **LSP**   | Any dice, board, player, state or strategy can replace another.                                                                   | Polymorphism enables substitution.                             |
-| **ISP**   |                                                                                                                                   |                                                                |
-| **DIP**   | Game relies on inward dependencies, specifically on abstract interfaces, not concrete implementations.                            | Allows runtime configuration and testing.                      | 
+| Principle | Application                                                                                                                                                         | What is the importance?                                        |
+|-----------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------|
+| **SRP**   | Dice *only* manages rolls, strategies *only* decide rule application, state machine controls lifecycle,<br/> observers *only* output and GameEngine *only* orchestrates. | Each class is responsible for one thing.                       |
+| **OCP**   | Game set-up (dice, board, player, states and strategies).                                                                                                           | Ability to add / update rules without modifying existing code. |
+| **LSP**   | Any dice, board, player, state or strategy can replace another.                                                                                                     | Polymorphism enables substitution.                             |
+| **ISP**   | Any interface - DiceShaker, EndStrategy, HitStrategy, Player, GameBoard, GameState.                                                                                 | Interfaces are small and focused.                              |
+| **DIP**   | Game relies on inward dependencies, specifically on abstract interfaces, not concrete implementations.                                                              | Allows runtime configuration and testing.                      |
 
 
+# 4. **Evaluation - a reflection on the implementation (and some honest reflections)**
 
-# Reflection
+# Personal Reflection
 This was as the name suggests, a frustrating, but rewarding challenge. Unsurprisingly there are many ways to generate this game, all with some merit. I've had to re-start from scratch after GitHub failed me, and got really annoyed when my game went into an infinite loop from time to time. Eventually realising it was due to the exact end strategy and random dice, I added a maximum number of game turns before exiting the game. I've continually added further builds, but ultimately this is what I felt worked best.
 
-If time allowed, I may have restructured the packages further to reflect the Clean Architecture layer (as below), although it's likely I'd have changed my mind again.
+## ☑  What works well:
+* **Clean Architecture is applied**
+  * All **dependencies point inward**.
+  * It requires discipline. It may feel like more work to begin with, but it provides improved clarity for anyone that needs to read your code.
+* Strong **separation of concerns**
+  * Ensures **responsibility** rules, game set-up, output and lifecycle states are **isolated** - no duplication of logic.
+  * Highly **extensible and testable** - allowing new game logic and rules to be added/modified with ease.
+  * Changes in one area do not impact other areas.
+  * Strategy and State patterns are vital in breaking down complex logic into separate classes of single responsibility that can be plugged in and tested easily. Avoiding painful and complex if/else statements.
+* Ability to **configure the game at runtime**.
+  * Ports, Adapters and Gateways are used to enable configuration to be determined at runtime, making any changes to game configuration simple.
+  * This is something that is vital in day to day life, where volatile variables (i.e. taxes, suppliers) can change regularly, and you need to be able to interchange these easily without impacting the rest of your system.
+* **Encapsulation** and **value objects** ensure classes and game logic are suitably managed.
+  * Avoids changes being made in accident or maliciously. Ultimately preventing potential bugs and errors.
+* Spring Boot is very powerful, yet it should only be responsible for wiring the game together. It should be isolated from game logic.
 
-## Package restructure possibility:
+## What could I have done differently?
+* **Package Structure** - if time allowed, it may have been prudent to restructure the package structure to a more explicit Clean Architecture folder layout to increase readability.
+  * For example:
     - board, dice, players, gamestrategies → domain
     - rungame → application
     - factories.*, gameobserver → infrastructure
     - boot → framework
-  - decorator pattern
+* decorator pattern
+  - - RECORDS
+- DECORATOR PATTERN
 
-What I would say is that I have learnt that:
-* Clean Architecture requires discipline. It may feel like more work to begin with, but it provides improved clarity for anyone that needs to read your code.
-* Strategy and State patterns are vital in breaking down complex logic into separate classes of single responsibility that can be plugged in and tested easily. Avoiding painful and complex if/else statements.
-* Ports and Adapters enable configuration to be determined at runtime, making any changes to game configuration simple. This is something that is vital in day to day life, where volatile variables (i.e. taxes, suppliers) can change regularly, and you need to be able to interchange these easily without impacting the rest of your system.
-* Encapsulation and value objects ensure classes and game logic are suitably managed, avoiding changes being made in accident or maliciously. Ultimately preventing potential bugs and errors.
-* Spring Boot is very powerful, but must be responsible for wiring the game together only, and should be isolated from the game logic.
 
 -----------------------------------------
 
@@ -422,4 +582,3 @@ DON'T FORGET TO REFERENCE ENCAPSULATION, ENUMS, OBJECT ORIENTATION, POLYMORPHISM
 * PUBLIC / PRIVATE ENCAPSULATION USED THROUGHOUT IN GAME DESIGN - WHY - SEPERATION OF CONCERNS AND AVOID ABILITY TO ACCESS/ MODIFY IN ERROR OR WITH INTENT.
   ☑
 > STATE MACHINE
-
