@@ -34,7 +34,7 @@ In order to demonstrate the features, run the game via the **FrustrationGameAppl
 | **Unit Testing**                                | ✅      | FixedDiceShaker,<br/>MockGameListener,<br/>Strategy, State and Board geometry tests.                            | - The architecture naturally supports testing as rules are isolated, dependencies inverted, and side effects are pushed outward.                                                                                                                                  |
 
 
-############################################################################################################
+#######################################################################################
 
 ## Part B. Game Explanation
 This will consist of 5 sections:
@@ -142,11 +142,11 @@ flowchart LR
 >* Having clear **separation of concerns** make the game easily **extensible and testable**.
 >* The system is **open for extension, yet closed for modification** - clearly aligning to the Open/Closed Principles (OCP).
 
-############################################################################################################
+#######################################################################################
 
 # 2. **Design Patterns - where are they used and why?** (focus on Strategy, State, Factory, Observer and Facade Patterns)
 
-############################################################################################################
+#######################################################################################
 
 ## A. **Strategy Pattern** - *Rule variations*
 
@@ -352,11 +352,11 @@ class StatelessFacade {
 >* This makes this approach highly testable, as demonstrated through the use of fixed dice and mock test scenarios.
 >* The strength of this is it **reduces coupling** - there is no duplicated logic, and rule logic retains separate and easily interchangeable without impacting the game engine itself (**in line with SRP**).
 
-############################################################################################################
+#######################################################################################
 
 # 3. **SOLID principles - where are they applied**
 
-############################################################################################################
+#######################################################################################
 
 ## S - **Single Responsibility Principle** (SRP)
 
@@ -484,11 +484,11 @@ classDiagram
 | **ISP**   | Any interface - DiceShaker, EndStrategy, HitStrategy, Player, GameBoard, GameState.                                                                                      | Interfaces are small and focused.                              |
 | **DIP**   | Game relies on inward dependencies, specifically on abstract interfaces, not concrete implementations.                                                                   | Allows runtime configuration and testing.                      |
 
-############################################################################################################
+#######################################################################################
 
 # 4. **Domain Modelling**
 
-############################################################################################################
+#######################################################################################
 
 The domain model is at the centre of the game, as it contains all business rules, invariants, and state transitions. Therefore, focus should be given to it.
 * This section explains how the domain has been structured and why it matters. 
@@ -497,20 +497,96 @@ The domain model is at the centre of the game, as it contains all business rules
 
 ## **Records**
 
+Java **Records** are used for *identity objects* of *immutable configuration*, where behaviour is minimal and purpose of the object is to carry data safely and transparently. 
+
+They are Data Transfer Objects (DTO) used to carry immutable data.
+
+In this game, **Players** are the only domain concept that could be considered for **Records**:
+* A Player’s identity (*colour, name, starting position*) does not change during the game.
+* Any **mutable behaviour** during the game is **handled by PlayerContext**, *not* the Player itself.
+* Players do not enforce invariants or contain domain logic.
+
+### ☑ Why Records were not used?
+Whilst feasible, they were discounted because: 
+* Players must implement the Player interface - using records would add little obvious benefit or simplicity to the code.
+* The current design already keeps Player objects simple and immutable.
+
+### ☑ Why Records would be useful
+
+* Strengthen the concept that Players are pure identity objects.
+* Guarantees immutability.
+* Reduce boilerplate - *although, marginally here*.
+* Make the domain model more explicit.
+
+## **Player Context**
+
+The *PlayersInGameContext* is a **stateful domain entity** that holds a representation of everything the game needs to know about a given player *during* the game itself.
+
+* In the game examples:
+  * current board index
+  * steps taken and move count
+  * whether they are in the board/tail
+  * whether the finished flag is set - ending the game
+  * a PlayersPosition and PlayersMoveHistory - both value objects
+* In essence, this does not track a players colour or where they start on the board. But the **current state / position** of the player in the game.
+
+### ☑ Why is this important for the design
+* Player Context centralises player movement into one clear encapsulated domain entity, with controlled methods used to mutate it during the game.
+* Without PlayerContext to manage the players in game context, then the game would have duplicated logic, scattered state with no clear mechanism to track move history, no way to protect against invalid move (*via value objects*) or to enforce against invariants.
+* Value Objects manage the common / shared board to compare equality across players.
+* Domain invariants are enforced - cannot move after finishing.
+
+## **Encapsulation**
+
+Encapsulation is used extensively to **protect the domain**. This involves the use of packages and private / public fields to ony expose data to view/modify when we want to, and protect it when we don't. 
+
+Within the game examples:
+* PlayersPosition fields are private
+* PlayerContext exposes methods like advancePosition() rather than exposing fields
+* Move history is updated via controlled mechanisms (methods).
+* GameState transitions can only be *triggered* via the State Machine.
+
+### ☑ Why is this important for the design
+* Prevents changes being made to game states in error / maliciously.
+* Reduces complexity and makes the domain more robust.
+
+## **Stateful vs Stateless Modelling**
+
+The domain deliberately separates **stateful** and **stateless** components. Examples of both include:
+
+**Stateless components** - should contain behaviour, not state!
+* Strategies
+* GameState
+* Dice Shakers (excluding fixed dice)
+* Boards
+* Players
+
+**Stateful components**
+* PlayerContext
+* MoveHistory
+* Game Snapshots (for Save and Replay)
+
+### ☑ Why is this important for the design
+* Separation og concerns, ensures Stateless components are isolated and easy to modify/test.
+* Stateful components are isolated and controlled.
+* The GameEngine can continue to orchestrate State transitions without holding state itself. 
+* Having this separation ensures predictability and keeps the Architecture Clean.
 
 
-############################################################################################################
+#######################################################################################
 
 # 5. **Evaluation - a reflection on the implementation (and some honest reflections)**
 
-############################################################################################################
+#######################################################################################
 
 ## Personal Reflection
 This was as the name suggests, a frustrating, but rewarding challenge. Unsurprisingly there are many ways to generate this game, all with some merit. I've had to re-start from scratch after GitHub failed me, and got really annoyed when my game went into an infinite loop from time to time. Eventually realising it was due to the exact end strategy and random dice, I added a maximum number of game turns before exiting the game. I've continually added further builds, but ultimately this is what I felt worked best.
+That said, the game demonstrates Clean Architecture, SOLID principles, and strong design patterns. This results in a simple game, easy to extend, without infinite loops, rule conflicts or configuration complexity.
 
 ## ☑  What works well:
 * **Clean Architecture is applied**
-  * All **dependencies point inward**.
+  * All **dependencies point inward** towards the domain.
+  * Spring Boot remains in the **outer ring**, responsible only for wiring and lifecycle.
   * It requires discipline. It may feel like more work to begin with, but it provides improved clarity for anyone that needs to read your code.
 * Strong **separation of concerns**
   * Ensures **responsibility** rules, game set-up, output and lifecycle states are **isolated** - no duplication of logic.
@@ -520,9 +596,12 @@ This was as the name suggests, a frustrating, but rewarding challenge. Unsurpris
 * Ability to **configure the game at runtime**.
   * Ports, Adapters and Gateways are used to enable configuration to be determined at runtime, making any changes to game configuration simple.
   * This is something that is vital in day to day life, where volatile variables (i.e. taxes, suppliers) can change regularly, and you need to be able to interchange these easily without impacting the rest of your system.
-* **Encapsulation** and **value objects** ensure classes and game logic are suitably managed.
+* **Encapsulation** and **Value Objects** ensure classes and game logic are suitably managed.
   * Avoids changes being made in accident or maliciously. Ultimately preventing potential bugs and errors.
-* Spring Boot is very powerful, yet it should only be responsible for wiring the game together. It should be isolated from game logic.
+* **Spring Boot** is very powerful, yet it should only be responsible for wiring the game together. It should be isolated from game logic.
+* **Save and Replay** 
+  * Move histories are persisted using JSON, with replay reconstructing chosen game. 
+  * The domain remains clean.
 
 ## What could I have done differently?
 * **Package Structure** - if time allowed, it may have been prudent to restructure the package structure to a more explicit Clean Architecture folder layout to increase readability.
@@ -531,64 +610,20 @@ This was as the name suggests, a frustrating, but rewarding challenge. Unsurpris
     - rungame → application
     - factories.*, gameobserver → infrastructure
     - boot → framework
-* decorator pattern
-  - - RECORDS
-- DECORATOR PATTERN
+    
+* **Decorator Pattern**
+It was feasible that some rule combinations could benefit from the Decorator Pattern, i.e. penalties layered on top of hit rules. In this basic game it was discounted, but arguably it would allow rule composition, without modifying existing strategies.
+
+* **Use of Records**
+   
+As noted previously, Players could be implemented as records and they remain a feasible option. On this occasion,the current design seemed appropriate.
+
+* **Save and Replay** - unique ID
+
+As this is a basic example to show the functionality, the game uses a rather large ID to save the game to ensure the client can find the specific game they wish to replay. It was feasible to add a basic incremental ID, but for the purposes of this game, it explicitly highlights the game configuration chosen and assigns a unique ID - overkill, but it works.
+
+* **Explicit Error Handling**
+The majority of the game makes the assumption everything is a valid configuration. Adding further error handling might prove more robust, especially should the game be further extended.
 
 
------------------------------------------
 
-DON'T FORGET TO REFERENCE ENCAPSULATION, ENUMS, OBJECT ORIENTATION, POLYMORPHISM ETC.
-
-* TBC - throughout the game packages and encapsulation are used to ensure private XYZ
-* Factories - good, why and when used.
-* Dependencies always point inwards.
-* Lab 10 infrastructure vs application domain models
-* RECORDS used, where and why?
-* MAKE SURE I ADD DIP DIAGRAM TO EXPLAIN THE PRINCIPLE
-* SAME WITH FACTORY, INTERFACES, OR POINNT AT ONES I HAVE DRWN - LABEL DIAGRAMS SAYING INTERFACE IMPLEMENTAIOTN/ DIP DEMO WITH GAME STUFF!
-* PUBLIC / PRIVATE ENCAPSULATION USED THROUGHOUT IN GAME DESIGN - WHY - SEPERATION OF CONCERNS AND AVOID ABILITY TO ACCESS/ MODIFY IN ERROR OR WITH INTENT.
-  ☑
-> STATE MACHINE
-> 
-> ## 1. Spring Boot Startup (Framework layer)
-### What it does
-* Spring Boot starts the application, acting as the entry point for the entire game engine.
-* The **StartUp** class is a **Spring Component** and **driving adapter**. It listens for the ApplicationReadyEvent, which on activation, *drives* the application by triggering the **RunGame** service.
-* Spring Boot will then **manage the Object lifecycle, Dependency Injection** and **Wiring of services** (e.g. *@Service, @Component*).
-* No domain class will import Spring.
-
-### ☑ Why is this important for the design
-* Spring Boot Dependency Injection provides a cleaner Architectural Framework, often mandatory for building enterprise applications.
-* The application uses the Spring Boot Framework for Dependency Injection, wiring everything together, holding bean definitions and instances and managing the lifecycle.
-* Maintains the framework in the 'outer ring', while keeping the core domain logic isolated from the Spring framework itself.
-* Supports Clean Architecture and the dependency rule: **Framework -> Infrastructure -> Application -> Domain**.
->* The strength of this approach (dependency injection) over alternatives is it removes hard-coded dependencies wiring the game, removes tight coupling and static factories and testability. Spring manages this efficiently.
-
-## 2. Run Game / Scenario Runner (Driving Ports)
-### What it does
-* Driving ports **prod the application code 'to do something'**.
-* In this case, these classes **drive** the application by selecting which scenarios are run (**ScenarioRunner and RunGameSimulations**).
-* This in turn creates *GameConfiguration* objects that are injected via Spring during application StartUp.
-
-### ☑ Why is this important for the design
-* Keeps scenario configuration logic separate from the actual game logic - users specify what variations of the game they want to run centrally, without impacting the actual game set-up and logic.
-* Allows the addition of new scenarios to be implemented easily.
-* Fully aligns to **Single Responsibility Principles (SRP)** and **Open/Closed principles** and improves game extensibility.
-* Dependency Injection (as should always be the case) points inwards - **TBC to validate if true and WHY IMPORTANT , removing reliance ON ......**
->* The strength here is that there is no hard-coded game configuration scenarios within the game engine, nor duplication of set-up logic.
-
-
-## 8. Player Contexts
-Player Contexts are an integral part of the **domain model**. The *PlayersInGameContext* is a **stateful domain entity** that holds a representation of everything the game needs to know about a given player during the game itself.
-* It includes a PlayersPosition and PlayersMoveHistory - both value objects. As well as keeping track of steps taken, move count, where they are in the board/tail and whether the finished flag is set - ending the game.
-* In essence, this does not track a players colour or where they start on the board. But the **current state / position** of the player in the game.
-
-### ☑ Why is this important for the design
-* Player Context centralises player movement into one clear encapsulated domain entity, with controlled methods used to mutate it during the game.
-* Without PlayerContext to manage the players in game context, then the game would have duplicated logic, scattered state with no clear mechanism to track move history, no way to protect against invalid move (*via value objects*) or to enforce against invariants.
-* Value Objects manage the common / shared board to compare equality across players.
->* The strength of this approach is Player Contexts have *one job* - to track and manage the player state during a game, keeping responsibilities clean and isolated in line with **SRP**.
->* Player Context can be extended (e.g. adding penalties) without modifying the GameEngine or other strategies, fulfilling **OCP**.
->* Player Context behaves the same way - all use the same methods, behaviours and invariants - which **TBC** supports the Liskov Substitution Principle (LSP).
->* Domain invariants are enforced, meaning players cannot finish twice for example. These rules are protected by encapsulation.
